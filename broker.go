@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"net"
 	"strconv"
+	"bufio"
 )
 
 type Broker struct {
@@ -24,7 +25,6 @@ func NextClientId() int64 {
 
 func (b *Broker) NextReqId() int64 {
 	b.ReqId += 1
-
 	return b.ReqId
 }
 
@@ -36,7 +36,7 @@ func (b *Broker) Initialize() {
 
 func (b *Broker) Connect() error {
 	conn, err := net.Dial("tcp", Conf.Host + ":" + Conf.Port)
-
+	
 	if err != nil {
 		Log.Print("error", "unable to connect to IB via tcp")
 		return err
@@ -60,7 +60,7 @@ func (b *Broker) ServerShake() error {
 	b.WriteInt(Conf.ClientVersion)
 	b.WriteInt(b.ClientId)
 
-	_, err := b.Send()
+	_, err := b.SendRequest()
 
 	return err
 }
@@ -69,16 +69,30 @@ func (b *Broker) Disconnect() error {
 	return b.Conn.Close()
 }
 
-func (b *Broker) Send() (i int, err error) {
-	Log.Print("sending", b.OutStream.String())
+func (b *Broker) SendRequest() (int, error) {
+	Log.Print("request", b.OutStream.String())
 
 	b.WriteString("\000")
 
-	i, err = b.Conn.Write(b.OutStream.Bytes())
+	i, err := b.Conn.Write(b.OutStream.Bytes())
 
 	b.OutStream.Reset()
 
-	return
+	return i, err
+}
+
+func (b *Broker) Listen() {
+	buf := bufio.NewReader(b.Conn)
+
+	for {
+		b, err := buf.ReadString('\000')
+
+		if err != nil {
+			continue
+		}
+
+		Log.Print("response", string(b))
+	}
 }
 
 func (b *Broker) SetServerLogLevel(i int64) {
@@ -86,7 +100,7 @@ func (b *Broker) SetServerLogLevel(i int64) {
 	b.WriteInt(1)
 	b.WriteInt(i)
 
-	b.Send()
+	b.SendRequest()
 }
 
 // GLOBAL
