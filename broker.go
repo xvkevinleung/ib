@@ -12,7 +12,7 @@ type Broker struct {
 	Conn net.Conn
 	ReqId int64
 	OutStream *bytes.Buffer
-	InStream *bytes.Buffer
+	InStream *bufio.Reader
 }
 
 // GLOBAL
@@ -31,7 +31,7 @@ func (b *Broker) NextReqId() int64 {
 func (b *Broker) Initialize() {
 	b.ClientId = NextClientId()
 	b.OutStream = bytes.NewBuffer(make([]byte, 0, 4096))
-	b.InStream = bytes.NewBuffer(make([]byte, 0, 4096))
+	b.InStream = bufio.NewReader(b.Conn)
 }
 
 func (b *Broker) Connect() error {
@@ -85,7 +85,7 @@ func (b *Broker) Listen() {
 	buf := bufio.NewReader(b.Conn)
 
 	for {
-		b, err := buf.ReadString('\000')
+		b, err := buf.ReadString(DelimByte)
 
 		if err != nil {
 			continue
@@ -104,18 +104,19 @@ func (b *Broker) SetServerLogLevel(i int64) {
 }
 
 // GLOBAL
-const Delim = "\000"
+const DelimStr = "\000"
+const DelimByte = '\000'
 
 func (b *Broker) WriteString(s string) (int, error) {
-	return b.OutStream.WriteString(s + Delim)
+	return b.OutStream.WriteString(s + DelimStr)
 }
 
 func (b *Broker) WriteInt(i int64) (int, error) {
-	return b.OutStream.WriteString(strconv.FormatInt(i, 10) + Delim)
+	return b.OutStream.WriteString(strconv.FormatInt(i, 10) + DelimStr)
 }
 
 func (b *Broker) WriteFloat(f float64) (int, error) {
-	return b.OutStream.WriteString(strconv.FormatFloat(f, 'g', 10, 64) + Delim)
+	return b.OutStream.WriteString(strconv.FormatFloat(f, 'g', 10, 64) + DelimStr)
 }
 
 func (b *Broker) WriteBool(boo bool) (int, error) {
@@ -126,4 +127,22 @@ func (b *Broker) WriteBool(boo bool) (int, error) {
 	return b.OutStream.WriteString("0")
 }
 
+func (b *Broker) ReadString() (string, error) {
+	return b.InStream.ReadString(DelimByte)
+}
 
+func (b *Broker) ReadInt() (int64, error) {
+	if str, err := b.ReadString(); err != nil {
+		return 0, err
+	} else {
+		return strconv.ParseInt(str, 10, 64)
+	}
+}
+
+func (b *Broker) ReadFloat() (float64, error) {
+	if str, err := b.ReadString(); err != nil {
+		return 0, err
+	} else {
+		return strconv.ParseFloat(str, 64)
+	}
+}

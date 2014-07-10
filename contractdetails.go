@@ -1,9 +1,5 @@
 package ib
 
-import (
-	"bufio"
-)
-
 type TagValue struct {
 	Tag string
 	Value string
@@ -73,55 +69,68 @@ func (d *ContractDetails) CreateRequest(c Contract) {
 }
 
 func (d *ContractDetails) Listen() {
+//	b := bufio.NewReader(d.Conn)
+
 	for {
-		b, err := d.InStream.ReadString('\000')
+		b, err := d.ReadString()
 
 		if err != nil {
 			continue
 		}
 
 		if b == RESPONSE.CODE.CONTRACT_DATA {
-			version, err := d.InStream.ReadString('\000')
-			rid, err := d.InStream.ReadString('\000')
-//			d.ReadMsg(version)
+			version, _ := d.ReadString()
+			rid, _ := d.ReadString()
+			_ = rid
+			d.ReadMsg(version)
 		}
 	}
 }
-/*
-func (d *ContractDetails) ReadMsg(version string) {
-	var c ContractDetailsData
 
-	c.Symbol string
-	c.SecurityType string
-	c.Expiry string
-	c.Strike float64
-	c.Right string
-	c.Exchange string
-	c.Currency string
-	c.LocalSymbol string
-	c.MarketName string
-	c.TradingClass string
-	c.ContractId int64 
-	c.MinTick int64
-	c.Multiplier int64
-	c.OrderTypes string
-	c.ValidExchanges string
-	c.PriceMagnifier int64
-	c.UnderlyingContractId int64
-	c.LongName string
-	c.PrimaryExchange string
-	c.ContractMonth string
-	c.Industry string
-	c.Category string
-	c.SubCategory string
-	c.TimeZoneId string
-	c.TradingHours string
-	c.LiquidHours string
-	c.EconValueRule string
-	c.EconValueMultiplier float64
-	c.SecIdListCount int64
-	c.SecIdList []TagValue
-	
-	Log.Print("contract", string(b))
+func (d *ContractDetails) ReadMsg(version string) ContractDetailsData {
+	var c ContractDetailsData
+//	c.SecIdList = make([]TagValue, 0)
+
+	var err error
+
+	c.Symbol, err = d.ReadString()
+	c.SecurityType, err = d.ReadString()
+	c.Expiry, err = d.ReadString()
+	c.Strike, err = d.ReadFloat() 
+	c.Right, err = d.ReadString()
+	c.Exchange, err = d.ReadString()
+	c.Currency, err = d.ReadString()
+	c.LocalSymbol, err = d.ReadString()
+	c.MarketName, err = d.ReadString()
+	c.TradingClass, err = d.ReadString()
+	c.ContractId, err = d.ReadInt() 
+	c.MinTick, err = d.ReadInt() 
+	c.Multiplier, err = d.ReadInt() 
+	c.OrderTypes, err = d.ReadString()
+	c.ValidExchanges, err = d.ReadString()
+	c.PriceMagnifier, err = d.ReadInt() 
+	c.UnderlyingContractId, err = d.ReadInt() 
+	c.LongName, err = d.ReadString()
+	c.PrimaryExchange, err = d.ReadString()
+	c.ContractMonth, err = d.ReadString()
+	c.Industry, err = d.ReadString()
+	c.Category, err = d.ReadString()
+	c.SubCategory, err = d.ReadString()
+	c.TimeZoneId, err = d.ReadString()
+	c.TradingHours, err = d.ReadString()
+	c.LiquidHours, err = d.ReadString()
+	c.EconValueRule, err = d.ReadString()
+	c.EconValueMultiplier, err = d.ReadFloat() 
+	c.SecIdListCount, err = d.ReadInt()
+
+	for i := 0; i < int(c.SecIdListCount); i++ {
+		t, _ := d.ReadString()
+		v, _ := d.ReadString()	
+		tv := TagValue{t, v}
+		c.SecIdList = append(c.SecIdList, tv)
+	}
+
+	_ = err
+	return c
 }
-*/
+
