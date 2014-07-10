@@ -6,6 +6,7 @@ type TagValue struct {
 }
 
 type ContractDetailsData struct {
+	Rid string
 	Symbol string
 	SecurityType string
 	Expiry string
@@ -69,8 +70,6 @@ func (d *ContractDetails) CreateRequest(c Contract) {
 }
 
 func (d *ContractDetails) Listen() {
-//	b := bufio.NewReader(d.Conn)
-
 	for {
 		b, err := d.ReadString()
 
@@ -79,20 +78,23 @@ func (d *ContractDetails) Listen() {
 		}
 
 		if b == RESPONSE.CODE.CONTRACT_DATA {
-			version, _ := d.ReadString()
-			rid, _ := d.ReadString()
-			_ = rid
-			d.ReadMsg(version)
+			version, err := d.ReadString()
+			c, err := d.ReadMsg(version)
+			
+			if err != nil {
+				Log.Print("error", err.Error())
+			} else {
+				Log.Print("response", c)
+			}
 		}
 	}
 }
 
-func (d *ContractDetails) ReadMsg(version string) ContractDetailsData {
+func (d *ContractDetails) ReadMsg(version string) (ContractDetailsData, error) {
 	var c ContractDetailsData
-//	c.SecIdList = make([]TagValue, 0)
-
 	var err error
 
+	c.Rid, err = d.ReadString()
 	c.Symbol, err = d.ReadString()
 	c.SecurityType, err = d.ReadString()
 	c.Expiry, err = d.ReadString()
@@ -124,13 +126,14 @@ func (d *ContractDetails) ReadMsg(version string) ContractDetailsData {
 	c.SecIdListCount, err = d.ReadInt()
 
 	for i := 0; i < int(c.SecIdListCount); i++ {
-		t, _ := d.ReadString()
-		v, _ := d.ReadString()	
+		var t, v string
+		
+		t, err = d.ReadString()
+		v, err = d.ReadString()	
 		tv := TagValue{t, v}
 		c.SecIdList = append(c.SecIdList, tv)
 	}
 
-	_ = err
-	return c
+	return c, err
 }
 
