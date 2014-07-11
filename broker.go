@@ -84,16 +84,14 @@ func (b *Broker) SendRequest() (int, error) {
 }
 
 func (b *Broker) Listen() {
-	buf := bufio.NewReader(b.Conn)
-
 	for {
-		b, err := buf.ReadString(DelimByte)
+		d, err := b.ReadString()
 
 		if err != nil {
 			continue
 		}
 
-		Log.Print("response", string(b))
+		Log.Print("response", string(d))
 	}
 }
 

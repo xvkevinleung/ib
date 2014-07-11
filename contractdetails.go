@@ -5,7 +5,7 @@ type TagValue struct {
 	Value string
 }
 
-type ContractDetailsObj struct {
+type ContractDetailsData struct {
 	Rid string
 	Symbol string
 	SecurityType string
@@ -41,15 +41,16 @@ type ContractDetailsObj struct {
 
 type ContractDetails struct {
 	Broker
+	DataChan chan ContractDetailsData
 }
 
 func ContractDetailsBroker() ContractDetails {
-	c := ContractDetails{Broker{}}
+	c := ContractDetails{Broker{}, make(chan ContractDetailsData)}
 	c.Broker.Initialize()
 	return c
 }
 
-func (d *ContractDetails) CreateRequest(c Contract) {
+func (d *ContractDetails) SendRequest(c Contract) {
 	d.WriteInt(REQUEST.CODE.CONTRACT_DATA)
 	d.WriteInt(REQUEST.VERSION.CONTRACT_DATA)
 	d.WriteInt(d.NextReqId())
@@ -67,9 +68,15 @@ func (d *ContractDetails) CreateRequest(c Contract) {
 	d.WriteBool(c.IncludeExpired)
 	d.WriteString(c.SecIdType)
 	d.WriteString(c.SecId)
+
+	d.Broker.SendRequest()
 }
 
-func (d *ContractDetails) Listen() {
+type ContractDetailsAction func()
+
+func (d *ContractDetails) Listen(f ContractDetailsAction) {
+	go f()
+
 	for {
 		b, err := d.ReadString()
 
@@ -79,19 +86,18 @@ func (d *ContractDetails) Listen() {
 
 		if b == RESPONSE.CODE.CONTRACT_DATA {
 			version, err := d.ReadString()
-			c, err := d.ReadMsg(version)
-			
+
 			if err != nil {
 				Log.Print("error", err.Error())
 			} else {
-				Log.Print("response", c)
+				d.GetContractDetailsData(version)
 			}
 		}
 	}
 }
 
-func (d *ContractDetails) ReadMsg(version string) (ContractDetailsObj, error) {
-	var c ContractDetailsObj
+func (d *ContractDetails) GetContractDetailsData(version string) {
+	var c ContractDetailsData
 	var err error
 
 	c.Rid, err = d.ReadString()
@@ -134,6 +140,11 @@ func (d *ContractDetails) ReadMsg(version string) (ContractDetailsObj, error) {
 		c.SecIdList = append(c.SecIdList, tv)
 	}
 
-	return c, err
+	if err != nil {
+		Log.Print("error", err.Error())
+	} else {
+		d.DataChan <- c
+	}
 }
+
 

@@ -2,16 +2,16 @@ package ib
 
 var RESPONSE ResStruct = ResStruct{
 	CODE: ResCodeStruct{
-		ERR_MSG: "4" + Conf.Delim,
-		CONTRACT_DATA: "10" + Conf.Delim,
-		TICK_PRICE: "1" + Conf.Delim,
-		TICK_SIZE: "2" + Conf.Delim,
-		TICK_OPTION_COMPUTATION: "21" + Conf.Delim,
-		TICK_GENERIC: "45" + Conf.Delim,
-		TICK_STRING: "46" + Conf.Delim,
-		TICK_EFP: "47" + Conf.Delim,
-		TICK_SNAPSHOT_END: "57" + Conf.Delim,
-		MARKET_DATA_TYPE: "58" + Conf.Delim,
+		ERR_MSG: "4",
+		CONTRACT_DATA: "10",
+		TICK_PRICE: "1",
+		TICK_SIZE: "2",
+		TICK_OPTION_COMPUTATION: "21",
+		TICK_GENERIC: "45",
+		TICK_STRING: "46",
+		TICK_EFP: "47",
+		TICK_SNAPSHOT_END: "57",
+		MARKET_DATA_TYPE: "58",
 	},
 }
 
