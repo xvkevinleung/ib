@@ -5,6 +5,7 @@ import (
 	"net"
 	"strconv"
 	"bufio"
+	"strings"
 )
 
 type Broker struct {
@@ -31,7 +32,6 @@ func (b *Broker) NextReqId() int64 {
 func (b *Broker) Initialize() {
 	b.ClientId = NextClientId()
 	b.OutStream = bytes.NewBuffer(make([]byte, 0, 4096))
-	b.InStream = bufio.NewReader(b.Conn)
 }
 
 func (b *Broker) Connect() error {
@@ -43,6 +43,8 @@ func (b *Broker) Connect() error {
 	}
 
 	b.Conn = conn
+
+	b.InStream = bufio.NewReader(b.Conn)
 
 	Log.Print("okay", "connected via tcp")
 
@@ -128,14 +130,18 @@ func (b *Broker) WriteBool(boo bool) (int, error) {
 }
 
 func (b *Broker) ReadString() (string, error) {
-	return b.InStream.ReadString(DelimByte)
+	if str, err := b.InStream.ReadString(DelimByte); err != nil {
+		return "", err
+	} else {
+		return strings.TrimRight(str, DelimStr), err
+	}
 }
 
 func (b *Broker) ReadInt() (int64, error) {
 	if str, err := b.ReadString(); err != nil {
 		return 0, err
 	} else {
-		return strconv.ParseInt(str, 10, 64)
+		return strconv.ParseInt(strings.TrimRight(str, DelimStr), 10, 64)
 	}
 }
 
@@ -143,6 +149,18 @@ func (b *Broker) ReadFloat() (float64, error) {
 	if str, err := b.ReadString(); err != nil {
 		return 0, err
 	} else {
-		return strconv.ParseFloat(str, 64)
+		return strconv.ParseFloat(strings.TrimRight(str, DelimStr), 64)
+	}
+}
+
+func (b *Broker) ReadBool() (bool, error) {
+	if int, err := b.ReadInt(); err != nil {
+		return false, err
+	} else {
+		if int != 0 {
+			return true, err
+		}
+
+		return false, err
 	}
 }

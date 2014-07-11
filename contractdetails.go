@@ -5,7 +5,7 @@ type TagValue struct {
 	Value string
 }
 
-type ContractDetailsData struct {
+type ContractDetailsObj struct {
 	Rid string
 	Symbol string
 	SecurityType string
@@ -90,8 +90,8 @@ func (d *ContractDetails) Listen() {
 	}
 }
 
-func (d *ContractDetails) ReadMsg(version string) (ContractDetailsData, error) {
-	var c ContractDetailsData
+func (d *ContractDetails) ReadMsg(version string) (ContractDetailsObj, error) {
+	var c ContractDetailsObj
 	var err error
 
 	c.Rid, err = d.ReadString()
