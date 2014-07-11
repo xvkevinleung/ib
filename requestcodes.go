@@ -1,17 +1,7 @@
 package ib
 
-var REQUEST ReqStruct = ReqStruct{
-	CODE: ReqCodeStruct{
-		MARKET_DATA: 1,
-		CONTRACT_DATA: 9,
-	},
-	VERSION: ReqVersionStruct{
-		MARKET_DATA: 10,
-		CONTRACT_DATA: 7,
-	},
-}
+var REQUEST ReqStruct
 
-// types for bucketing request codes
 type ReqStruct struct {
 	CODE ReqCodeStruct 
 	VERSION ReqVersionStruct
@@ -20,9 +10,23 @@ type ReqStruct struct {
 type ReqCodeStruct struct {
 	MARKET_DATA int64
 	CONTRACT_DATA int64
+	HISTORICAL_DATA int64
 }
 
 type ReqVersionStruct struct {
 	MARKET_DATA int64
 	CONTRACT_DATA int64
+	HISTORICAL_DATA int64
 }
+
+func init() {
+	REQUEST.CODE.MARKET_DATA = 1
+	REQUEST.CODE.CONTRACT_DATA = 9
+	REQUEST.CODE.HISTORICAL_DATA = 20 
+
+	REQUEST.VERSION.MARKET_DATA = 10
+	REQUEST.VERSION.CONTRACT_DATA = 7
+	REQUEST.VERSION.HISTORICAL_DATA = 5
+}
+
+

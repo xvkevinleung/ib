@@ -12,6 +12,7 @@ var RESPONSE ResStruct = ResStruct{
 		TICK_EFP: "47",
 		TICK_SNAPSHOT_END: "57",
 		MARKET_DATA_TYPE: "58",
+		HISTORICAL_DATA: "17",
 	},
 }
 
@@ -31,4 +32,5 @@ type ResCodeStruct struct {
 	TICK_EFP string
 	TICK_SNAPSHOT_END string
 	MARKET_DATA_TYPE string
+	HISTORICAL_DATA string
 }

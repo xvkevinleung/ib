@@ -121,10 +121,10 @@ func (b *Broker) WriteFloat(f float64) (int, error) {
 
 func (b *Broker) WriteBool(boo bool) (int, error) {
 	if boo {
-		return b.OutStream.WriteString("1")
+		return b.OutStream.WriteString("1" + DelimStr)
 	}
 
-	return b.OutStream.WriteString("0")
+	return b.OutStream.WriteString("0" + DelimStr)
 }
 
 func (b *Broker) ReadString() (string, error) {
