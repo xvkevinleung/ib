@@ -24,14 +24,19 @@ type PortfolioData struct {
 	AccountName string
 }
 
-type AccountValueBroker struc {
+type AccountTimeData struct {
+	Time string
+}
+
+type AccountValueBroker struct {
 	Broker
 	AccountValueDataChan chan AccountValueData
-	PortfolioDataChan chan PortfolioDAta
+	PortfolioDataChan chan PortfolioData
+	AccountTimeDataChan chan AccountTimeData
 }
 
 func NewAccountBroker() AccountValueBroker {
-	a := AccountValueBroker{Broker{}, make(chan AccountValueData), make(chan PortfolioData)}
+	a := AccountValueBroker{Broker{}, make(chan AccountValueData), make(chan PortfolioData), make(chan AccountTimeData)}
 	a.Broker.Initialize()
 	return a
 }
@@ -48,7 +53,7 @@ func (a *AccountValueBroker) SendRequest(d AccountValueDataReq) {
 
 type AccountValueAction func()
 
-func (a *AccountValueBroker) Listen(f AccountValueDataReq) {
+func (a *AccountValueBroker) Listen(f AccountValueAction) {
 	go f()
 
 	for {
@@ -81,14 +86,13 @@ func (a *AccountValueBroker) GetAccountValueData(code, version string) {
 	var d AccountValueData
 	var err error
 
-	d.Rid, err = a.ReadString()
 	d.Key, err = a.ReadString()
 	d.Value, err = a.ReadString()
 	d.Currency, err = a.ReadString()
 	d.Account, err = a.ReadString()
 
 	if err != nil {
-		Log.Print("error", err.Error))
+		Log.Print("error", err.Error)
 	} else {
 		a.AccountValueDataChan <- d
 	}
@@ -98,28 +102,40 @@ func (a *AccountValueBroker) GetPortfolioData(code, version string) {
 	var d PortfolioData
 	var err error
 
-	d.Rid, err = a.ReadString()
-	
-	d.Contract.ContractId = a.ReadInt()
-	d.Contract.Symbol = a.ReadString()
-	d.Contract.SecurityType = a.ReadString()
-	d.Contract.Expiry = a.ReadString()
-	d.Contract.Strike = a.ReadFloat()
-	d.Contract.Right = a.ReadString()
-	d.Contract.Multiplier = a.ReadString()
-	d.Contract.PrimaryExchange = a.ReadString()
-	d.Contract.Currency = a.ReadString()
-	d.Contract.LocalSymbol = a.ReadString()
-	d.Contract.TradingClass = a.ReadString()
-
+	d.Contract.ContractId, err = a.ReadInt()
+	d.Contract.Symbol, err = a.ReadString()
+	d.Contract.SecurityType, err = a.ReadString()
+	d.Contract.Expiry, err = a.ReadString()
+	d.Contract.Strike, err = a.ReadFloat()
+	d.Contract.Right, err = a.ReadString()
+	d.Contract.Multiplier, err = a.ReadString()
+	d.Contract.PrimaryExchange, err = a.ReadString()
+	d.Contract.Currency, err = a.ReadString()
+	d.Contract.LocalSymbol, err = a.ReadString()
+	d.Contract.TradingClass, err = a.ReadString()
+	d.Position, err = a.ReadInt()
+	d.MarketPrice, err = a.ReadFloat()
+	d.MarketValue, err = a.ReadFloat()
+	d.AverageCost, err = a.ReadFloat()
+	d.UnrealizedPNL, err = a.ReadFloat()
+	d.AccountName, err = a.ReadString()
 	
 	if err != nil {
-		Log.Print("error", err.Error))
+		Log.Print("error", err.Error)
 	} else {
 		a.PortfolioDataChan <- d
 	}
 }
 
 func (a *AccountValueBroker) GetAccountUpdateTime(code, version string) {
+	var d AccountTimeData
+	var err error
 
+	d.Time, err = a.ReadString()
+
+	if err != nil {
+		Log.Print("error", err.Error)
+	} else {
+		a.AccountTimeDataChan <- d
+	}
 }
