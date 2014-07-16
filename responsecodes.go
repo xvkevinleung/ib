@@ -3,24 +3,24 @@ package ib
 var RESPONSE ResponseHeader
 
 type ResponseHeader struct {
-	CODE ResponseCodes 
+	CODE ResponseCodes
 }
 
 type ResponseCodes struct {
-	ERR_MSG string
-	CONTRACT_DATA string 
-	TICK_PRICE string
-	TICK_SIZE string
+	ERR_MSG                 string
+	CONTRACT_DATA           string
+	TICK_PRICE              string
+	TICK_SIZE               string
 	TICK_OPTION_COMPUTATION string
-	TICK_GENERIC string
-	TICK_STRING string
-	TICK_EFP string
-	TICK_SNAPSHOT_END string
-	MARKET_DATA_TYPE string
-	HISTORICAL_DATA string
-	ACCOUNT_VALUE string
-	PORTFOLIO_VALUE string
-	ACCOUNT_UPDATE_TIME string
+	TICK_GENERIC            string
+	TICK_STRING             string
+	TICK_EFP                string
+	TICK_SNAPSHOT_END       string
+	MARKET_DATA_TYPE        string
+	HISTORICAL_DATA         string
+	ACCOUNT_VALUE           string
+	PORTFOLIO_VALUE         string
+	ACCOUNT_UPDATE_TIME     string
 }
 
 func init() {

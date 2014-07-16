@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-type IBLog struct{
+type IBLog struct {
 	L *log.Logger
 }
 

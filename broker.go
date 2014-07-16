@@ -1,19 +1,19 @@
-package ib 
+package ib
 
 import (
+	"bufio"
 	"bytes"
 	"net"
 	"strconv"
-	"bufio"
 	"strings"
 )
 
 type Broker struct {
-	ClientId int64
-	Conn net.Conn
-	ReqId int64
+	ClientId  int64
+	Conn      net.Conn
+	ReqId     int64
 	OutStream *bytes.Buffer
-	InStream *bufio.Reader
+	InStream  *bufio.Reader
 }
 
 func NextClientId() int64 {
@@ -34,8 +34,8 @@ func (b *Broker) Initialize() {
 func (b *Broker) Connect() error {
 	b.Initialize()
 
-	conn, err := net.Dial("tcp", Conf.Host + ":" + Conf.Port)
-	
+	conn, err := net.Dial("tcp", Conf.Host+":"+Conf.Port)
+
 	if err != nil {
 		Log.Print("error", "unable to connect to IB via tcp")
 		return err
@@ -54,7 +54,7 @@ func (b *Broker) Connect() error {
 		return err
 	}
 
-	return err 
+	return err
 }
 
 func (b *Broker) ServerShake() error {

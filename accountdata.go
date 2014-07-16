@@ -1,27 +1,27 @@
 package ib
 
 type AccountDataRequest struct {
-	Subscribe bool
+	Subscribe   bool
 	AccountCode string
 }
 
 type AccountValueData struct {
-	Key string
-	Value string
+	Key      string
+	Value    string
 	Currency string
-	Account string
+	Account  string
 }
 
 type PortfolioData struct {
-	Key string
-	Contract Contract
-	Position int64
-	MarketPrice float64
-	MarketValue float64
-	AverageCost float64
+	Key           string
+	Contract      Contract
+	Position      int64
+	MarketPrice   float64
+	MarketValue   float64
+	AverageCost   float64
 	UnrealizedPNL float64
-	RealizedPNL float64
-	AccountName string
+	RealizedPNL   float64
+	AccountName   string
 }
 
 type AccountTimeData struct {
@@ -31,18 +31,18 @@ type AccountTimeData struct {
 type AccountDataBroker struct {
 	Broker
 	AccountValueDataChan chan AccountValueData
-	PortfolioDataChan chan PortfolioData
-	AccountTimeDataChan chan AccountTimeData
+	PortfolioDataChan    chan PortfolioData
+	AccountTimeDataChan  chan AccountTimeData
 }
 
 func NewAccountDataBroker() AccountDataBroker {
 	a := AccountDataBroker{
-		Broker{}, 
-		make(chan AccountValueData), 
-		make(chan PortfolioData), 
+		Broker{},
+		make(chan AccountValueData),
+		make(chan PortfolioData),
 		make(chan AccountTimeData),
 	}
-	
+
 	return a
 }
 
@@ -75,12 +75,12 @@ func (a *AccountDataBroker) Listen(f AccountDataAction) {
 				Log.Print("error", err.Error())
 			} else {
 				switch b {
-					case RESPONSE.CODE.ACCOUNT_VALUE:
-						a.ReadAccountValueData(b, version)
-					case RESPONSE.CODE.PORTFOLIO_VALUE:
-						a.ReadPortfolioData(b, version)
-					case RESPONSE.CODE.ACCOUNT_UPDATE_TIME:
-						a.ReadAccountUpdateTime(b, version)
+				case RESPONSE.CODE.ACCOUNT_VALUE:
+					a.ReadAccountValueData(b, version)
+				case RESPONSE.CODE.PORTFOLIO_VALUE:
+					a.ReadPortfolioData(b, version)
+				case RESPONSE.CODE.ACCOUNT_UPDATE_TIME:
+					a.ReadAccountUpdateTime(b, version)
 				}
 			}
 		}
@@ -124,7 +124,7 @@ func (a *AccountDataBroker) ReadPortfolioData(code, version string) {
 	d.AverageCost, err = a.ReadFloat()
 	d.UnrealizedPNL, err = a.ReadFloat()
 	d.AccountName, err = a.ReadString()
-	
+
 	if err != nil {
 		Log.Print("error", err.Error)
 	} else {

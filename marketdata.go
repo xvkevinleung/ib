@@ -2,68 +2,68 @@ package ib
 
 type MarketDataBroker struct {
 	Broker
-	TickPriceChan chan TickPrice
-	TickSizeChan chan TickSize
-	TickOptCompChan chan TickOptComp
-	TickGenericChan chan TickGeneric
-	TickStringChan chan TickString
-	TickEFPChan chan TickEFP
+	TickPriceChan      chan TickPrice
+	TickSizeChan       chan TickSize
+	TickOptCompChan    chan TickOptComp
+	TickGenericChan    chan TickGeneric
+	TickStringChan     chan TickString
+	TickEFPChan        chan TickEFP
 	MarketDataTypeChan chan MarketDataType
 }
 
 type TickPrice struct {
-	Rid string
-	TickType int64
-	Price float64
-	Size int64
-	CanAutoExecute bool 
+	Rid            string
+	TickType       int64
+	Price          float64
+	Size           int64
+	CanAutoExecute bool
 }
 
 type TickSize struct {
-	Rid string
+	Rid      string
 	TickType int64
-	Size int64
+	Size     int64
 }
 
 type TickOptComp struct {
-	Rid string
-	TickType int64
-	ImpliedVol float64
-	Delta float64
+	Rid         string
+	TickType    int64
+	ImpliedVol  float64
+	Delta       float64
 	OptionPrice float64
-	PvDividend float64
-	Gamma float64
-	Vega float64
-	Theta float64
-	SpotPrice float64
+	PvDividend  float64
+	Gamma       float64
+	Vega        float64
+	Theta       float64
+	SpotPrice   float64
 }
 
 type TickGeneric struct {
-	Rid string
+	Rid      string
 	TickType int64
-	Value float64
+	Value    float64
 }
 
 type TickString struct {
-	Rid string
+	Rid      string
 	TickType int64
-	Value string
+	Value    string
 }
 
 type TickEFP struct {
-	Rid string
-	TickType int64
-	BasisPoints float64
+	Rid                  string
+	TickType             int64
+	BasisPoints          float64
 	FormattedBasisPoints string
-	ImpliedFuturesPrice float64
-	HoldDays int64
-	FuturesExpiry string
-	DividendImpact float64
-	DividendsToExpiry float64
+	ImpliedFuturesPrice  float64
+	HoldDays             int64
+	FuturesExpiry        string
+	DividendImpact       float64
+	DividendsToExpiry    float64
 }
 
 type MarketDataType struct {
-	Rid string
+	Rid      string
 	TickType int64
 }
 
@@ -119,28 +119,28 @@ func (m *MarketDataBroker) Listen(f MarketDataAction) {
 
 		if b != RESPONSE.CODE.ERR_MSG {
 			version, err := m.ReadString()
-			
+
 			if err != nil {
 				Log.Print("error", err.Error())
 			} else {
 				switch b {
-					case RESPONSE.CODE.TICK_PRICE:
-						m.ReadTickPrice(b, version)
-					case RESPONSE.CODE.TICK_SIZE:
-						m.ReadTickSize(b,version)		
-					case RESPONSE.CODE.TICK_OPTION_COMPUTATION:
-						m.ReadTickOptComp(b, version)
-					case RESPONSE.CODE.TICK_GENERIC:
-						m.ReadTickGeneric(b, version)
-					case RESPONSE.CODE.TICK_STRING:
-						m.ReadTickString(b, version)
-					case RESPONSE.CODE.TICK_EFP:
-						m.ReadTickEFP(b, version)
-					case RESPONSE.CODE.TICK_SNAPSHOT_END:
-					case RESPONSE.CODE.MARKET_DATA_TYPE:
-						m.ReadMarketDataType(b, version)
-					default:
-						m.ReadString()
+				case RESPONSE.CODE.TICK_PRICE:
+					m.ReadTickPrice(b, version)
+				case RESPONSE.CODE.TICK_SIZE:
+					m.ReadTickSize(b, version)
+				case RESPONSE.CODE.TICK_OPTION_COMPUTATION:
+					m.ReadTickOptComp(b, version)
+				case RESPONSE.CODE.TICK_GENERIC:
+					m.ReadTickGeneric(b, version)
+				case RESPONSE.CODE.TICK_STRING:
+					m.ReadTickString(b, version)
+				case RESPONSE.CODE.TICK_EFP:
+					m.ReadTickEFP(b, version)
+				case RESPONSE.CODE.TICK_SNAPSHOT_END:
+				case RESPONSE.CODE.MARKET_DATA_TYPE:
+					m.ReadMarketDataType(b, version)
+				default:
+					m.ReadString()
 				}
 			}
 		}
@@ -171,19 +171,20 @@ func (m *MarketDataBroker) ReadTickSize(code, version string) {
 	s.Rid, err = m.ReadString()
 	s.TickType, err = m.ReadInt()
 	s.Size, err = m.ReadInt()
-	                              
+
 	if err != nil {
 		Log.Print("error", err.Error())
 	} else {
 		m.TickSizeChan <- s
-	}}
+	}
+}
 
 func (m *MarketDataBroker) ReadTickOptComp(code, version string) {
 	var o TickOptComp
 	var err error
 
 	o.Rid, err = m.ReadString()
-	o.TickType, err = m.ReadInt() 
+	o.TickType, err = m.ReadInt()
 	o.ImpliedVol, err = m.ReadFloat()
 	o.Delta, err = m.ReadFloat()
 	o.OptionPrice, err = m.ReadFloat()
@@ -255,7 +256,7 @@ func (m *MarketDataBroker) ReadMarketDataType(code, version string) {
 	var d MarketDataType
 	var err error
 
-	d.Rid, err  = m.ReadString()
+	d.Rid, err = m.ReadString()
 	d.TickType, err = m.ReadInt()
 
 	if err != nil {
@@ -264,4 +265,3 @@ func (m *MarketDataBroker) ReadMarketDataType(code, version string) {
 		m.MarketDataTypeChan <- d
 	}
 }
-

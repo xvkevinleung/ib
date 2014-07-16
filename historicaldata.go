@@ -1,33 +1,33 @@
 package ib
 
 type HistoricalDataRequest struct {
-	Con Contract
-	End string
-	Bar string
-	Dur string
-	Rth bool 
-	Show string
+	Con   Contract
+	End   string
+	Bar   string
+	Dur   string
+	Rth   bool
+	Show  string
 	Datef int64
 }
 
 type HistoricalDataItem struct {
-	Date string 
-	Open float64
-	High float64
-	Low float64
-	Close float64
-	Volume int64
-	WAP float64
-	HasGaps bool
+	Date     string
+	Open     float64
+	High     float64
+	Low      float64
+	Close    float64
+	Volume   int64
+	WAP      float64
+	HasGaps  bool
 	BarCount int64
 }
 
 type HistoricalData struct {
-	Rid string
+	Rid   string
 	Start string
-	End string
+	End   string
 	Count int64
-	Data []HistoricalDataItem
+	Data  []HistoricalDataItem
 }
 
 type HistoricalDataBroker struct {

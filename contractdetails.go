@@ -1,42 +1,42 @@
 package ib
 
 type TagValue struct {
-	Tag string
+	Tag   string
 	Value string
 }
 
 type ContractDetailsData struct {
-	Rid string
-	Symbol string
-	SecurityType string
-	Expiry string
-	Strike float64
-	Right string
-	Exchange string
-	Currency string
-	LocalSymbol string
-	MarketName string
-	TradingClass string
-	ContractId int64 
-	MinTick int64
-	Multiplier int64
-	OrderTypes string
-	ValidExchanges string
-	PriceMagnifier int64
+	Rid                  string
+	Symbol               string
+	SecurityType         string
+	Expiry               string
+	Strike               float64
+	Right                string
+	Exchange             string
+	Currency             string
+	LocalSymbol          string
+	MarketName           string
+	TradingClass         string
+	ContractId           int64
+	MinTick              int64
+	Multiplier           int64
+	OrderTypes           string
+	ValidExchanges       string
+	PriceMagnifier       int64
 	UnderlyingContractId int64
-	LongName string
-	PrimaryExchange string
-	ContractMonth string
-	Industry string
-	Category string
-	SubCategory string
-	TimeZoneId string
-	TradingHours string
-	LiquidHours string
-	EconValueRule string
-	EconValueMultiplier float64
-	SecIdListCount int64
-	SecIdList []TagValue
+	LongName             string
+	PrimaryExchange      string
+	ContractMonth        string
+	Industry             string
+	Category             string
+	SubCategory          string
+	TimeZoneId           string
+	TradingHours         string
+	LiquidHours          string
+	EconValueRule        string
+	EconValueMultiplier  float64
+	SecIdListCount       int64
+	SecIdList            []TagValue
 }
 
 type ContractDetailsBroker struct {
@@ -104,20 +104,20 @@ func (d *ContractDetailsBroker) ReadContractDetailsData(version string) {
 	c.Symbol, err = d.ReadString()
 	c.SecurityType, err = d.ReadString()
 	c.Expiry, err = d.ReadString()
-	c.Strike, err = d.ReadFloat() 
+	c.Strike, err = d.ReadFloat()
 	c.Right, err = d.ReadString()
 	c.Exchange, err = d.ReadString()
 	c.Currency, err = d.ReadString()
 	c.LocalSymbol, err = d.ReadString()
 	c.MarketName, err = d.ReadString()
 	c.TradingClass, err = d.ReadString()
-	c.ContractId, err = d.ReadInt() 
-	c.MinTick, err = d.ReadInt() 
-	c.Multiplier, err = d.ReadInt() 
+	c.ContractId, err = d.ReadInt()
+	c.MinTick, err = d.ReadInt()
+	c.Multiplier, err = d.ReadInt()
 	c.OrderTypes, err = d.ReadString()
 	c.ValidExchanges, err = d.ReadString()
-	c.PriceMagnifier, err = d.ReadInt() 
-	c.UnderlyingContractId, err = d.ReadInt() 
+	c.PriceMagnifier, err = d.ReadInt()
+	c.UnderlyingContractId, err = d.ReadInt()
 	c.LongName, err = d.ReadString()
 	c.PrimaryExchange, err = d.ReadString()
 	c.ContractMonth, err = d.ReadString()
@@ -128,14 +128,14 @@ func (d *ContractDetailsBroker) ReadContractDetailsData(version string) {
 	c.TradingHours, err = d.ReadString()
 	c.LiquidHours, err = d.ReadString()
 	c.EconValueRule, err = d.ReadString()
-	c.EconValueMultiplier, err = d.ReadFloat() 
+	c.EconValueMultiplier, err = d.ReadFloat()
 	c.SecIdListCount, err = d.ReadInt()
 
 	for i := 0; i < int(c.SecIdListCount); i++ {
 		var t, v string
-		
+
 		t, err = d.ReadString()
-		v, err = d.ReadString()	
+		v, err = d.ReadString()
 		tv := TagValue{t, v}
 		c.SecIdList = append(c.SecIdList, tv)
 	}
@@ -146,5 +146,3 @@ func (d *ContractDetailsBroker) ReadContractDetailsData(version string) {
 		d.DataChan <- c
 	}
 }
-
-
