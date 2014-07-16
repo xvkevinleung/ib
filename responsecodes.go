@@ -1,12 +1,12 @@
 package ib
 
-var RESPONSE ResStruct
+var RESPONSE ResponseHeader
 
-type ResStruct struct {
-	CODE ResCodeStruct 
+type ResponseHeader struct {
+	CODE ResponseCodes 
 }
 
-type ResCodeStruct struct {
+type ResponseCodes struct {
 	ERR_MSG string
 	CONTRACT_DATA string 
 	TICK_PRICE string

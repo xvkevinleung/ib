@@ -16,12 +16,9 @@ type Broker struct {
 	InStream *bufio.Reader
 }
 
-// GLOBAL
-var ClientIdIncr int64 = 999 
-
 func NextClientId() int64 {
-	ClientIdIncr += 1
-	return ClientIdIncr
+	CLIENT_ID_INCR += 1
+	return CLIENT_ID_INCR
 }
 
 func (b *Broker) NextReqId() int64 {
@@ -35,6 +32,8 @@ func (b *Broker) Initialize() {
 }
 
 func (b *Broker) Connect() error {
+	b.Initialize()
+
 	conn, err := net.Dial("tcp", Conf.Host + ":" + Conf.Port)
 	
 	if err != nil {
@@ -74,7 +73,7 @@ func (b *Broker) Disconnect() error {
 func (b *Broker) SendRequest() (int, error) {
 	Log.Print("request", b.OutStream.String())
 
-	b.WriteString("\000")
+	b.WriteString(DELIM_STR)
 
 	i, err := b.Conn.Write(b.OutStream.Bytes())
 
@@ -103,35 +102,31 @@ func (b *Broker) SetServerLogLevel(i int64) {
 	b.SendRequest()
 }
 
-// GLOBAL
-const DelimStr = "\000"
-const DelimByte = '\000'
-
 func (b *Broker) WriteString(s string) (int, error) {
-	return b.OutStream.WriteString(s + DelimStr)
+	return b.OutStream.WriteString(s + DELIM_STR)
 }
 
 func (b *Broker) WriteInt(i int64) (int, error) {
-	return b.OutStream.WriteString(strconv.FormatInt(i, 10) + DelimStr)
+	return b.OutStream.WriteString(strconv.FormatInt(i, 10) + DELIM_STR)
 }
 
 func (b *Broker) WriteFloat(f float64) (int, error) {
-	return b.OutStream.WriteString(strconv.FormatFloat(f, 'g', 10, 64) + DelimStr)
+	return b.OutStream.WriteString(strconv.FormatFloat(f, 'g', 10, 64) + DELIM_STR)
 }
 
 func (b *Broker) WriteBool(boo bool) (int, error) {
 	if boo {
-		return b.OutStream.WriteString("1" + DelimStr)
+		return b.OutStream.WriteString("1" + DELIM_STR)
 	}
 
-	return b.OutStream.WriteString("0" + DelimStr)
+	return b.OutStream.WriteString("0" + DELIM_STR)
 }
 
 func (b *Broker) ReadString() (string, error) {
-	if str, err := b.InStream.ReadString(DelimByte); err != nil {
+	if str, err := b.InStream.ReadString(DELIM_BYTE); err != nil {
 		return "", err
 	} else {
-		return strings.TrimRight(str, DelimStr), err
+		return strings.TrimRight(str, DELIM_STR), err
 	}
 }
 
@@ -139,7 +134,7 @@ func (b *Broker) ReadInt() (int64, error) {
 	if str, err := b.ReadString(); err != nil {
 		return 0, err
 	} else {
-		return strconv.ParseInt(strings.TrimRight(str, DelimStr), 10, 64)
+		return strconv.ParseInt(strings.TrimRight(str, DELIM_STR), 10, 64)
 	}
 }
 
@@ -147,7 +142,7 @@ func (b *Broker) ReadFloat() (float64, error) {
 	if str, err := b.ReadString(); err != nil {
 		return 0, err
 	} else {
-		return strconv.ParseFloat(strings.TrimRight(str, DelimStr), 64)
+		return strconv.ParseFloat(strings.TrimRight(str, DELIM_STR), 64)
 	}
 }
 

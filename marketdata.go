@@ -1,6 +1,6 @@
 package ib
 
-type MarketData struct {
+type MarketDataBroker struct {
 	Broker
 	TickPriceChan chan TickPrice
 	TickSizeChan chan TickSize
@@ -67,8 +67,8 @@ type MarketDataType struct {
 	TickType int64
 }
 
-func MarketDataBroker() MarketData {
-	m := MarketData{
+func NewMarketDataBroker() MarketDataBroker {
+	m := MarketDataBroker{
 		Broker{},
 		make(chan TickPrice),
 		make(chan TickSize),
@@ -78,11 +78,11 @@ func MarketDataBroker() MarketData {
 		make(chan TickEFP),
 		make(chan MarketDataType),
 	}
-	m.Broker.Initialize()
+
 	return m
 }
 
-func (m *MarketData) SendRequest(c Contract) {
+func (m *MarketDataBroker) SendRequest(c Contract) {
 	m.WriteInt(REQUEST.CODE.MARKET_DATA)
 	m.WriteInt(REQUEST.VERSION.MARKET_DATA)
 	m.WriteInt(m.NextReqId())
@@ -107,7 +107,7 @@ func (m *MarketData) SendRequest(c Contract) {
 
 type MarketDataAction func()
 
-func (m *MarketData) Listen(f MarketDataAction) {
+func (m *MarketDataBroker) Listen(f MarketDataAction) {
 	go f()
 
 	for {
@@ -125,20 +125,20 @@ func (m *MarketData) Listen(f MarketDataAction) {
 			} else {
 				switch b {
 					case RESPONSE.CODE.TICK_PRICE:
-						m.GetTickPrice(b, version)
+						m.ReadTickPrice(b, version)
 					case RESPONSE.CODE.TICK_SIZE:
-						m.GetTickSize(b,version)		
+						m.ReadTickSize(b,version)		
 					case RESPONSE.CODE.TICK_OPTION_COMPUTATION:
-						m.GetTickOptComp(b, version)
+						m.ReadTickOptComp(b, version)
 					case RESPONSE.CODE.TICK_GENERIC:
-						m.GetTickGeneric(b, version)
+						m.ReadTickGeneric(b, version)
 					case RESPONSE.CODE.TICK_STRING:
-						m.GetTickString(b, version)
+						m.ReadTickString(b, version)
 					case RESPONSE.CODE.TICK_EFP:
-						m.GetTickEFP(b, version)
+						m.ReadTickEFP(b, version)
 					case RESPONSE.CODE.TICK_SNAPSHOT_END:
 					case RESPONSE.CODE.MARKET_DATA_TYPE:
-						m.GetMarketDataType(b, version)
+						m.ReadMarketDataType(b, version)
 					default:
 						m.ReadString()
 				}
@@ -147,7 +147,7 @@ func (m *MarketData) Listen(f MarketDataAction) {
 	}
 }
 
-func (m *MarketData) GetTickPrice(code, version string) {
+func (m *MarketDataBroker) ReadTickPrice(code, version string) {
 	var p TickPrice
 	var err error
 
@@ -164,7 +164,7 @@ func (m *MarketData) GetTickPrice(code, version string) {
 	}
 }
 
-func (m *MarketData) GetTickSize(code, version string) {
+func (m *MarketDataBroker) ReadTickSize(code, version string) {
 	var s TickSize
 	var err error
 
@@ -178,7 +178,7 @@ func (m *MarketData) GetTickSize(code, version string) {
 		m.TickSizeChan <- s
 	}}
 
-func (m *MarketData) GetTickOptComp(code, version string) {
+func (m *MarketDataBroker) ReadTickOptComp(code, version string) {
 	var o TickOptComp
 	var err error
 
@@ -200,7 +200,7 @@ func (m *MarketData) GetTickOptComp(code, version string) {
 	}
 }
 
-func (m *MarketData) GetTickGeneric(code, version string) {
+func (m *MarketDataBroker) ReadTickGeneric(code, version string) {
 	var g TickGeneric
 	var err error
 
@@ -215,7 +215,7 @@ func (m *MarketData) GetTickGeneric(code, version string) {
 	}
 }
 
-func (m *MarketData) GetTickString(code, version string) {
+func (m *MarketDataBroker) ReadTickString(code, version string) {
 	var s TickString
 	var err error
 
@@ -230,7 +230,7 @@ func (m *MarketData) GetTickString(code, version string) {
 	}
 }
 
-func (m *MarketData) GetTickEFP(code, version string) {
+func (m *MarketDataBroker) ReadTickEFP(code, version string) {
 	var e TickEFP
 	var err error
 
@@ -251,7 +251,7 @@ func (m *MarketData) GetTickEFP(code, version string) {
 	}
 }
 
-func (m *MarketData) GetMarketDataType(code, version string) {
+func (m *MarketDataBroker) ReadMarketDataType(code, version string) {
 	var d MarketDataType
 	var err error
 

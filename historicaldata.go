@@ -1,6 +1,6 @@
 package ib
 
-type HistoricalDataReq struct {
+type HistoricalDataRequest struct {
 	Con Contract
 	End string
 	Bar string
@@ -37,11 +37,10 @@ type HistoricalDataBroker struct {
 
 func NewHistoricalDataBroker() HistoricalDataBroker {
 	h := HistoricalDataBroker{Broker{}, make(chan HistoricalData)}
-	h.Broker.Initialize()
 	return h
 }
 
-func (h *HistoricalDataBroker) SendRequest(d HistoricalDataReq) {
+func (h *HistoricalDataBroker) SendRequest(d HistoricalDataRequest) {
 	h.WriteInt(REQUEST.CODE.HISTORICAL_DATA)
 	h.WriteInt(REQUEST.VERSION.HISTORICAL_DATA)
 	h.WriteInt(h.NextReqId())
@@ -86,13 +85,13 @@ func (h *HistoricalDataBroker) Listen(f HistoricalDataAction) {
 			if err != nil {
 				Log.Print("error", err.Error())
 			} else {
-				h.GetHistoricalData(version)
+				h.ReadHistoricalData(version)
 			}
 		}
 	}
 }
 
-func (h *HistoricalDataBroker) GetHistoricalData(version string) {
+func (h *HistoricalDataBroker) ReadHistoricalData(version string) {
 	var d HistoricalData
 	var err error
 

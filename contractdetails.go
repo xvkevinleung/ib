@@ -39,18 +39,18 @@ type ContractDetailsData struct {
 	SecIdList []TagValue
 }
 
-type ContractDetails struct {
+type ContractDetailsBroker struct {
 	Broker
 	DataChan chan ContractDetailsData
 }
 
-func ContractDetailsBroker() ContractDetails {
-	c := ContractDetails{Broker{}, make(chan ContractDetailsData)}
+func NewContractDetailsBroker() ContractDetailsBroker {
+	c := ContractDetailsBroker{Broker{}, make(chan ContractDetailsData)}
 	c.Broker.Initialize()
 	return c
 }
 
-func (d *ContractDetails) SendRequest(c Contract) {
+func (d *ContractDetailsBroker) SendRequest(c Contract) {
 	d.WriteInt(REQUEST.CODE.CONTRACT_DATA)
 	d.WriteInt(REQUEST.VERSION.CONTRACT_DATA)
 	d.WriteInt(d.NextReqId())
@@ -74,7 +74,7 @@ func (d *ContractDetails) SendRequest(c Contract) {
 
 type ContractDetailsAction func()
 
-func (d *ContractDetails) Listen(f ContractDetailsAction) {
+func (d *ContractDetailsBroker) Listen(f ContractDetailsAction) {
 	go f()
 
 	for {
@@ -90,13 +90,13 @@ func (d *ContractDetails) Listen(f ContractDetailsAction) {
 			if err != nil {
 				Log.Print("error", err.Error())
 			} else {
-				d.GetContractDetailsData(version)
+				d.ReadContractDetailsData(version)
 			}
 		}
 	}
 }
 
-func (d *ContractDetails) GetContractDetailsData(version string) {
+func (d *ContractDetailsBroker) ReadContractDetailsData(version string) {
 	var c ContractDetailsData
 	var err error
 

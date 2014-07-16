@@ -1,20 +1,20 @@
 package ib
 
-var REQUEST ReqStruct
+var REQUEST RequestHeader
 
-type ReqStruct struct {
-	CODE ReqCodeStruct 
-	VERSION ReqVersionStruct
+type RequestHeader struct {
+	CODE RequestCodes 
+	VERSION RequestVersions
 }
 
-type ReqCodeStruct struct {
+type RequestCodes struct {
 	MARKET_DATA int64
 	CONTRACT_DATA int64
 	HISTORICAL_DATA int64
 	ACCOUNT_VALUE int64
 }
 
-type ReqVersionStruct struct {
+type RequestVersions struct {
 	MARKET_DATA int64
 	CONTRACT_DATA int64
 	HISTORICAL_DATA int64
