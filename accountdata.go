@@ -73,15 +73,16 @@ func (a *AccountDataBroker) Listen(f AccountDataAction) {
 
 			if err != nil {
 				Log.Print("error", err.Error())
-			} else {
-				switch b {
+				continue
+			} 
+			
+			switch b {
 				case RESPONSE.CODE.ACCOUNT_VALUE:
 					a.ReadAccountValueData(b, version)
 				case RESPONSE.CODE.PORTFOLIO_VALUE:
 					a.ReadPortfolioData(b, version)
 				case RESPONSE.CODE.ACCOUNT_UPDATE_TIME:
 					a.ReadAccountUpdateTime(b, version)
-				}
 			}
 		}
 	}
@@ -98,9 +99,10 @@ func (a *AccountDataBroker) ReadAccountValueData(code, version string) {
 
 	if err != nil {
 		Log.Print("error", err.Error)
-	} else {
-		a.AccountValueDataChan <- d
+		return
 	}
+	
+	a.AccountValueDataChan <- d
 }
 
 func (a *AccountDataBroker) ReadPortfolioData(code, version string) {
@@ -127,9 +129,10 @@ func (a *AccountDataBroker) ReadPortfolioData(code, version string) {
 
 	if err != nil {
 		Log.Print("error", err.Error)
-	} else {
-		a.PortfolioDataChan <- d
+		return
 	}
+		
+	a.PortfolioDataChan <- d
 }
 
 func (a *AccountDataBroker) ReadAccountUpdateTime(code, version string) {
@@ -140,7 +143,8 @@ func (a *AccountDataBroker) ReadAccountUpdateTime(code, version string) {
 
 	if err != nil {
 		Log.Print("error", err.Error)
-	} else {
-		a.AccountTimeDataChan <- d
+		return
 	}
+	
+	a.AccountTimeDataChan <- d
 }

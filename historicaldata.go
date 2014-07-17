@@ -84,9 +84,10 @@ func (h *HistoricalDataBroker) Listen(f HistoricalDataAction) {
 
 			if err != nil {
 				Log.Print("error", err.Error())
-			} else {
-				h.ReadHistoricalData(version)
+				continue
 			}
+				
+			h.ReadHistoricalData(version)
 		}
 	}
 }

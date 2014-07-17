@@ -123,37 +123,44 @@ func (b *Broker) WriteBool(boo bool) (int, error) {
 }
 
 func (b *Broker) ReadString() (string, error) {
-	if str, err := b.InStream.ReadString(DELIM_BYTE); err != nil {
+	str, err := b.InStream.ReadString(DELIM_BYTE)
+	if err != nil {
 		return "", err
-	} else {
-		return strings.TrimRight(str, DELIM_STR), err
-	}
+	} 
+	
+	return strings.TrimRight(str, DELIM_STR), err
 }
 
 func (b *Broker) ReadInt() (int64, error) {
-	if str, err := b.ReadString(); err != nil {
+	str, err := b.ReadString()
+
+	if err != nil {
 		return 0, err
-	} else {
-		return strconv.ParseInt(strings.TrimRight(str, DELIM_STR), 10, 64)
-	}
+	} 
+	
+	return strconv.ParseInt(strings.TrimRight(str, DELIM_STR), 10, 64)
 }
 
 func (b *Broker) ReadFloat() (float64, error) {
-	if str, err := b.ReadString(); err != nil {
+	str, err := b.ReadString()
+
+	if err != nil {
 		return 0, err
-	} else {
-		return strconv.ParseFloat(strings.TrimRight(str, DELIM_STR), 64)
 	}
+	
+	return strconv.ParseFloat(strings.TrimRight(str, DELIM_STR), 64)
 }
 
 func (b *Broker) ReadBool() (bool, error) {
-	if int, err := b.ReadInt(); err != nil {
-		return false, err
-	} else {
-		if int != 0 {
-			return true, err
-		}
+	int, err := b.ReadInt()
 
+	if err != nil {
 		return false, err
 	}
+	
+	if int != 0 {
+		return true, err
+	}
+
+	return false, err
 }
