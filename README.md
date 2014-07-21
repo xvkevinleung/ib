@@ -1,3 +1,4 @@
+```html
 <h1>IB</h1>
 
 <p>A golang package for the <a href="http://www.interactivebrokers.com">Interactive Brokers</a> API.</p>
@@ -132,4 +133,5 @@
 	<p>Attaching to the xpra server will start X11 forwarding of the IB Gateway GUI and the standard log in steps can be completed.</p>
 	<p>Once logged in, the user can safely detach from xpra with &lt;CTL-c&gt;. IB Gateway will continue to run but the GUI will be diverted.</p>
 	<p>Run algos...</p>
-</p> 
+</p>
+```
