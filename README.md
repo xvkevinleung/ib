@@ -25,7 +25,7 @@
 	<table>
 		<thead>
 			<tr style="font-weight: 600;">
-				<td><a href="http://www.interactivebrokers.com">IB Gateway Documentation</a></td>
+				<td><a href="https://www.interactivebrokers.com/en/software/api/api.htm">IB Gateway Documentation</a></td>
 				<td>IB Package Type</td>
 				<td>IB Package File</td>
 			</tr>
@@ -47,7 +47,7 @@
 				<td>contractdetails.go</td>
 			</tr>
 			<tr>
-				<td>Account Value</td>
+				<td>Account and Portfolio</td>
 				<td>AccountDataBroker</td>
 				<td>accountdata.go</td>
 			</tr>
@@ -123,7 +123,7 @@
 	Running IB Gateway on a server poses a couple of small obstacles.
 </p>
 <p>
-	First of all, the IB Gateway GUI is inseparable from the functionality it provides. Therefore, the GUI must be running to communicate with the brokerage. Since the GUI is somewhat minimal, X11 forwarding is not a major issue. But we must divert the GUI and keep it running while the algorithms run. To accomplish this, install <a href="http://www.xpra.org">xpra</a>. Described as "screen for GUI applications," xpra will let us start IB Gateway, login, and subsequently detach while keeping the application running in an xpra session. 
+	First of all, the IB Gateway GUI is inseparable from the functionality it provides. Therefore, the GUI must be running to communicate with the brokerage. Since the GUI is somewhat minimal, X11 forwarding is not a major issue. But we must divert the GUI and keep it running while the algorithms run. To accomplish this, install <a href="http://xpra.org">xpra</a>. Described as "screen for GUI applications," xpra will let us start IB Gateway, login, and subsequently detach while keeping the application running in an xpra session. 
 	<p>First, the user must log in to the server with X11 forwarding over ssh.<p>
 	<p>To start an xpra server, use <span style="font-family: monospace;">xpra start :0</span>.</p>
 	<p>Once the xpra server is running, start a screen session on display 0: <span style="font-family: monospace;">DISPLAY=:0 screen</span>.</p>
