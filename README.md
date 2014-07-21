@@ -80,19 +80,19 @@
 	go mktData.Listen(func () {
 			for {
 				select {
-					case p := <-m.TickPriceChan:
+					case p := <lt;-m.TickPriceChan:
 						ib.Log.Print("price", p)
-					case s := <-m.TickSizeChan:
+					case s := <lt;-m.TickSizeChan:
 						ib.Log.Print("size", s)
-					case o := <-m.TickOptCompChan:
+					case o := <lt;-m.TickOptCompChan:
 						ib.Log.Print("optcomp", o)
-					case g := <-m.TickGenericChan:
+					case g := <lt;-m.TickGenericChan:
 						ib.Log.Print("generic", g)
-					case t := <-m.TickStringChan:
+					case t := <lt;-m.TickStringChan:
 						ib.Log.Print("string", t)
-					case e := <-m.TickEFPChan:
+					case e := <lt;-m.TickEFPChan:
 						ib.Log.Print("efp", e)
-					case d := <-m.MarketDataTypeChan:
+					case d := <lt;-m.MarketDataTypeChan:
 						ib.Log.Print("datatype", d)
 				}
 			}
