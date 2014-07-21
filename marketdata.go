@@ -122,8 +122,10 @@ func (m *MarketDataBroker) Listen(f MarketDataAction) {
 
 			if err != nil {
 				Log.Print("error", err.Error())
-			} else {
-				switch b {
+				continue
+			} 
+			
+			switch b {
 				case RESPONSE.CODE.TICK_PRICE:
 					m.ReadTickPrice(b, version)
 				case RESPONSE.CODE.TICK_SIZE:
@@ -141,7 +143,6 @@ func (m *MarketDataBroker) Listen(f MarketDataAction) {
 					m.ReadMarketDataType(b, version)
 				default:
 					m.ReadString()
-				}
 			}
 		}
 	}
@@ -196,9 +197,10 @@ func (m *MarketDataBroker) ReadTickOptComp(code, version string) {
 
 	if err != nil {
 		Log.Print("error", err.Error())
-	} else {
-		m.TickOptCompChan <- o
-	}
+		return
+	} 
+	
+	m.TickOptCompChan <- o
 }
 
 func (m *MarketDataBroker) ReadTickGeneric(code, version string) {
@@ -211,9 +213,10 @@ func (m *MarketDataBroker) ReadTickGeneric(code, version string) {
 
 	if err != nil {
 		Log.Print("error", err.Error())
-	} else {
-		m.TickGenericChan <- g
-	}
+		return
+	} 
+	
+	m.TickGenericChan <- g
 }
 
 func (m *MarketDataBroker) ReadTickString(code, version string) {
@@ -226,9 +229,10 @@ func (m *MarketDataBroker) ReadTickString(code, version string) {
 
 	if err != nil {
 		Log.Print("error", err.Error())
-	} else {
-		m.TickStringChan <- s
-	}
+		return
+	} 
+	
+	m.TickStringChan <- s
 }
 
 func (m *MarketDataBroker) ReadTickEFP(code, version string) {
@@ -247,9 +251,10 @@ func (m *MarketDataBroker) ReadTickEFP(code, version string) {
 
 	if err != nil {
 		Log.Print("error", err.Error())
-	} else {
-		m.TickEFPChan <- e
-	}
+		return
+	} 
+	
+	m.TickEFPChan <- e
 }
 
 func (m *MarketDataBroker) ReadMarketDataType(code, version string) {
@@ -261,7 +266,8 @@ func (m *MarketDataBroker) ReadMarketDataType(code, version string) {
 
 	if err != nil {
 		Log.Print("error", err.Error())
-	} else {
-		m.MarketDataTypeChan <- d
+		return
 	}
+
+	m.MarketDataTypeChan <- d
 }

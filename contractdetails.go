@@ -89,9 +89,10 @@ func (d *ContractDetailsBroker) Listen(f ContractDetailsAction) {
 
 			if err != nil {
 				Log.Print("error", err.Error())
-			} else {
-				d.ReadContractDetailsData(version)
-			}
+				continue
+			} 
+			
+			d.ReadContractDetailsData(version)
 		}
 	}
 }
@@ -142,7 +143,8 @@ func (d *ContractDetailsBroker) ReadContractDetailsData(version string) {
 
 	if err != nil {
 		Log.Print("error", err.Error())
-	} else {
-		d.DataChan <- c
-	}
+		return
+	} 
+	
+	d.DataChan <- c
 }
