@@ -88,7 +88,6 @@ func (d *ContractDetailsBroker) Listen(f ContractDetailsAction) {
 			version, err := d.ReadString()
 
 			if err != nil {
-				Log.Print("error", err.Error())
 				continue
 			} 
 			
@@ -99,52 +98,46 @@ func (d *ContractDetailsBroker) Listen(f ContractDetailsAction) {
 
 func (d *ContractDetailsBroker) ReadContractDetailsData(version string) {
 	var c ContractDetailsData
-	var err error
 
-	c.Rid, err = d.ReadString()
-	c.Symbol, err = d.ReadString()
-	c.SecurityType, err = d.ReadString()
-	c.Expiry, err = d.ReadString()
-	c.Strike, err = d.ReadFloat()
-	c.Right, err = d.ReadString()
-	c.Exchange, err = d.ReadString()
-	c.Currency, err = d.ReadString()
-	c.LocalSymbol, err = d.ReadString()
-	c.MarketName, err = d.ReadString()
-	c.TradingClass, err = d.ReadString()
-	c.ContractId, err = d.ReadInt()
-	c.MinTick, err = d.ReadInt()
-	c.Multiplier, err = d.ReadInt()
-	c.OrderTypes, err = d.ReadString()
-	c.ValidExchanges, err = d.ReadString()
-	c.PriceMagnifier, err = d.ReadInt()
-	c.UnderlyingContractId, err = d.ReadInt()
-	c.LongName, err = d.ReadString()
-	c.PrimaryExchange, err = d.ReadString()
-	c.ContractMonth, err = d.ReadString()
-	c.Industry, err = d.ReadString()
-	c.Category, err = d.ReadString()
-	c.SubCategory, err = d.ReadString()
-	c.TimeZoneId, err = d.ReadString()
-	c.TradingHours, err = d.ReadString()
-	c.LiquidHours, err = d.ReadString()
-	c.EconValueRule, err = d.ReadString()
-	c.EconValueMultiplier, err = d.ReadFloat()
-	c.SecIdListCount, err = d.ReadInt()
+	c.Rid, _ = d.ReadString()
+	c.Symbol, _ = d.ReadString()
+	c.SecurityType, _ = d.ReadString()
+	c.Expiry, _ = d.ReadString()
+	c.Strike, _ = d.ReadFloat()
+	c.Right, _ = d.ReadString()
+	c.Exchange, _ = d.ReadString()
+	c.Currency, _ = d.ReadString()
+	c.LocalSymbol, _ = d.ReadString()
+	c.MarketName, _ = d.ReadString()
+	c.TradingClass, _ = d.ReadString()
+	c.ContractId, _ = d.ReadInt()
+	c.MinTick, _ = d.ReadInt()
+	c.Multiplier, _ = d.ReadInt()
+	c.OrderTypes, _ = d.ReadString()
+	c.ValidExchanges, _ = d.ReadString()
+	c.PriceMagnifier, _ = d.ReadInt()
+	c.UnderlyingContractId, _ = d.ReadInt()
+	c.LongName, _ = d.ReadString()
+	c.PrimaryExchange, _ = d.ReadString()
+	c.ContractMonth, _ = d.ReadString()
+	c.Industry, _ = d.ReadString()
+	c.Category, _ = d.ReadString()
+	c.SubCategory, _ = d.ReadString()
+	c.TimeZoneId, _ = d.ReadString()
+	c.TradingHours, _ = d.ReadString()
+	c.LiquidHours, _ = d.ReadString()
+	c.EconValueRule, _ = d.ReadString()
+	c.EconValueMultiplier, _ = d.ReadFloat()
+	c.SecIdListCount, _ = d.ReadInt()
 
 	for i := 0; i < int(c.SecIdListCount); i++ {
 		var t, v string
 
-		t, err = d.ReadString()
-		v, err = d.ReadString()
+		t, _ = d.ReadString()
+		v, _ = d.ReadString()
 		tv := TagValue{t, v}
 		c.SecIdList = append(c.SecIdList, tv)
 	}
 
-	if err != nil {
-		Log.Print("error", err.Error())
-		return
-	} 
-	
 	d.DataChan <- c
 }
