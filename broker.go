@@ -6,6 +6,7 @@ import (
 	"net"
 	"strconv"
 	"strings"
+	"errors"
 )
 
 type Broker struct {
@@ -37,7 +38,6 @@ func (b *Broker) Connect() error {
 	conn, err := net.Dial("tcp", Conf.Host+":"+Conf.Port)
 
 	if err != nil {
-		Log.Print("error", "unable to connect to IB via tcp")
 		return err
 	}
 
@@ -45,14 +45,7 @@ func (b *Broker) Connect() error {
 
 	b.InStream = bufio.NewReader(b.Conn)
 
-	Log.Print("okay", "connected via tcp")
-
 	err = b.ServerShake()
-
-	if err != nil {
-		Log.Print("error", "unable to perform server shake")
-		return err
-	}
 
 	return err
 }
@@ -71,8 +64,6 @@ func (b *Broker) Disconnect() error {
 }
 
 func (b *Broker) SendRequest() (int, error) {
-	Log.Print("request", b.OutStream.String())
-
 	b.WriteString(DELIM_STR)
 
 	i, err := b.Conn.Write(b.OutStream.Bytes())
@@ -89,8 +80,6 @@ func (b *Broker) Listen() {
 		if err != nil {
 			continue
 		}
-
-		Log.Print("response", string(d))
 	}
 }
 

@@ -72,7 +72,6 @@ func (a *AccountDataBroker) Listen(f AccountDataAction) {
 			version, err := a.ReadString()
 
 			if err != nil {
-				Log.Print("error", err.Error())
 				continue
 			} 
 			
@@ -90,61 +89,43 @@ func (a *AccountDataBroker) Listen(f AccountDataAction) {
 
 func (a *AccountDataBroker) ReadAccountValueData(code, version string) {
 	var d AccountValueData
-	var err error
 
-	d.Key, err = a.ReadString()
-	d.Value, err = a.ReadString()
-	d.Currency, err = a.ReadString()
-	d.Account, err = a.ReadString()
+	d.Key, _ = a.ReadString()
+	d.Value, _ = a.ReadString()
+	d.Currency, _ = a.ReadString()
+	d.Account, _ = a.ReadString()
 
-	if err != nil {
-		Log.Print("error", err.Error)
-		return
-	}
-	
 	a.AccountValueDataChan <- d
 }
 
 func (a *AccountDataBroker) ReadPortfolioData(code, version string) {
 	var d PortfolioData
-	var err error
 
-	d.Contract.ContractId, err = a.ReadInt()
-	d.Contract.Symbol, err = a.ReadString()
-	d.Contract.SecurityType, err = a.ReadString()
-	d.Contract.Expiry, err = a.ReadString()
-	d.Contract.Strike, err = a.ReadFloat()
-	d.Contract.Right, err = a.ReadString()
-	d.Contract.Multiplier, err = a.ReadString()
-	d.Contract.PrimaryExchange, err = a.ReadString()
-	d.Contract.Currency, err = a.ReadString()
-	d.Contract.LocalSymbol, err = a.ReadString()
-	d.Contract.TradingClass, err = a.ReadString()
-	d.Position, err = a.ReadInt()
-	d.MarketPrice, err = a.ReadFloat()
-	d.MarketValue, err = a.ReadFloat()
-	d.AverageCost, err = a.ReadFloat()
-	d.UnrealizedPNL, err = a.ReadFloat()
-	d.AccountName, err = a.ReadString()
+	d.Contract.ContractId, _ = a.ReadInt()
+	d.Contract.Symbol, _ = a.ReadString()
+	d.Contract.SecurityType, _ = a.ReadString()
+	d.Contract.Expiry, _ = a.ReadString()
+	d.Contract.Strike, _ = a.ReadFloat()
+	d.Contract.Right, _ = a.ReadString()
+	d.Contract.Multiplier, _ = a.ReadString()
+	d.Contract.PrimaryExchange, _ = a.ReadString()
+	d.Contract.Currency, _ = a.ReadString()
+	d.Contract.LocalSymbol, _ = a.ReadString()
+	d.Contract.TradingClass, _ = a.ReadString()
+	d.Position, _ = a.ReadInt()
+	d.MarketPrice, _ = a.ReadFloat()
+	d.MarketValue, _ = a.ReadFloat()
+	d.AverageCost, _ = a.ReadFloat()
+	d.UnrealizedPNL, _ = a.ReadFloat()
+	d.AccountName, _ = a.ReadString()
 
-	if err != nil {
-		Log.Print("error", err.Error)
-		return
-	}
-		
 	a.PortfolioDataChan <- d
 }
 
 func (a *AccountDataBroker) ReadAccountUpdateTime(code, version string) {
 	var d AccountTimeData
-	var err error
 
-	d.Time, err = a.ReadString()
+	d.Time, _ = a.ReadString()
 
-	if err != nil {
-		Log.Print("error", err.Error)
-		return
-	}
-	
 	a.AccountTimeDataChan <- d
 }

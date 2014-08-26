@@ -121,7 +121,6 @@ func (m *MarketDataBroker) Listen(f MarketDataAction) {
 			version, err := m.ReadString()
 
 			if err != nil {
-				Log.Print("error", err.Error())
 				continue
 			} 
 			
@@ -150,124 +149,84 @@ func (m *MarketDataBroker) Listen(f MarketDataAction) {
 
 func (m *MarketDataBroker) ReadTickPrice(code, version string) {
 	var p TickPrice
-	var err error
 
-	p.Rid, err = m.ReadString()
-	p.TickType, err = m.ReadInt()
-	p.Price, err = m.ReadFloat()
-	p.Size, err = m.ReadInt()
-	p.CanAutoExecute, err = m.ReadBool()
+	p.Rid, _ = m.ReadString()
+	p.TickType, _ = m.ReadInt()
+	p.Price, _ = m.ReadFloat()
+	p.Size, _ = m.ReadInt()
+	p.CanAutoExecute, _ = m.ReadBool()
 
-	if err != nil {
-		Log.Print("error", err.Error())
-	} else {
-		m.TickPriceChan <- p
-	}
+	m.TickPriceChan <- p
 }
 
 func (m *MarketDataBroker) ReadTickSize(code, version string) {
 	var s TickSize
-	var err error
 
-	s.Rid, err = m.ReadString()
-	s.TickType, err = m.ReadInt()
-	s.Size, err = m.ReadInt()
+	s.Rid, _ = m.ReadString()
+	s.TickType, _ = m.ReadInt()
+	s.Size, _ = m.ReadInt()
 
-	if err != nil {
-		Log.Print("error", err.Error())
-	} else {
-		m.TickSizeChan <- s
-	}
+	m.TickSizeChan <- s
 }
 
 func (m *MarketDataBroker) ReadTickOptComp(code, version string) {
 	var o TickOptComp
-	var err error
 
-	o.Rid, err = m.ReadString()
-	o.TickType, err = m.ReadInt()
-	o.ImpliedVol, err = m.ReadFloat()
-	o.Delta, err = m.ReadFloat()
-	o.OptionPrice, err = m.ReadFloat()
-	o.PvDividend, err = m.ReadFloat()
-	o.Gamma, err = m.ReadFloat()
-	o.Vega, err = m.ReadFloat()
-	o.Theta, err = m.ReadFloat()
-	o.SpotPrice, err = m.ReadFloat()
+	o.Rid, _ = m.ReadString()
+	o.TickType, _ = m.ReadInt()
+	o.ImpliedVol, _ = m.ReadFloat()
+	o.Delta, _ = m.ReadFloat()
+	o.OptionPrice, _ = m.ReadFloat()
+	o.PvDividend, _ = m.ReadFloat()
+	o.Gamma, _ = m.ReadFloat()
+	o.Vega, _ = m.ReadFloat()
+	o.Theta, _ = m.ReadFloat()
+	o.SpotPrice, _ = m.ReadFloat()
 
-	if err != nil {
-		Log.Print("error", err.Error())
-		return
-	} 
-	
 	m.TickOptCompChan <- o
 }
 
 func (m *MarketDataBroker) ReadTickGeneric(code, version string) {
 	var g TickGeneric
-	var err error
 
-	g.Rid, err = m.ReadString()
-	g.TickType, err = m.ReadInt()
-	g.Value, err = m.ReadFloat()
+	g.Rid, _ = m.ReadString()
+	g.TickType, _ = m.ReadInt()
+	g.Value, _ = m.ReadFloat()
 
-	if err != nil {
-		Log.Print("error", err.Error())
-		return
-	} 
-	
 	m.TickGenericChan <- g
 }
 
 func (m *MarketDataBroker) ReadTickString(code, version string) {
 	var s TickString
-	var err error
 
-	s.Rid, err = m.ReadString()
-	s.TickType, err = m.ReadInt()
-	s.Value, err = m.ReadString()
+	s.Rid, _ = m.ReadString()
+	s.TickType, _ = m.ReadInt()
+	s.Value, _ = m.ReadString()
 
-	if err != nil {
-		Log.Print("error", err.Error())
-		return
-	} 
-	
 	m.TickStringChan <- s
 }
 
 func (m *MarketDataBroker) ReadTickEFP(code, version string) {
 	var e TickEFP
-	var err error
 
-	e.Rid, err = m.ReadString()
-	e.TickType, err = m.ReadInt()
-	e.BasisPoints, err = m.ReadFloat()
-	e.FormattedBasisPoints, err = m.ReadString()
-	e.ImpliedFuturesPrice, err = m.ReadFloat()
-	e.HoldDays, err = m.ReadInt()
-	e.FuturesExpiry, err = m.ReadString()
-	e.DividendImpact, err = m.ReadFloat()
-	e.DividendsToExpiry, err = m.ReadFloat()
+	e.Rid, _ = m.ReadString()
+	e.TickType, _ = m.ReadInt()
+	e.BasisPoints, _ = m.ReadFloat()
+	e.FormattedBasisPoints, _ = m.ReadString()
+	e.ImpliedFuturesPrice, _ = m.ReadFloat()
+	e.HoldDays, _ = m.ReadInt()
+	e.FuturesExpiry, _ = m.ReadString()
+	e.DividendImpact, _ = m.ReadFloat()
+	e.DividendsToExpiry, _ = m.ReadFloat()
 
-	if err != nil {
-		Log.Print("error", err.Error())
-		return
-	} 
-	
 	m.TickEFPChan <- e
 }
 
 func (m *MarketDataBroker) ReadMarketDataType(code, version string) {
 	var d MarketDataType
-	var err error
 
-	d.Rid, err = m.ReadString()
-	d.TickType, err = m.ReadInt()
-
-	if err != nil {
-		Log.Print("error", err.Error())
-		return
-	}
+	d.Rid, _ = m.ReadString()
+	d.TickType, _ = m.ReadInt()
 
 	m.MarketDataTypeChan <- d
 }

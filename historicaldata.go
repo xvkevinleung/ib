@@ -83,7 +83,6 @@ func (h *HistoricalDataBroker) Listen(f HistoricalDataAction) {
 			version, err := h.ReadString()
 
 			if err != nil {
-				Log.Print("error", err.Error())
 				continue
 			}
 				
@@ -94,33 +93,25 @@ func (h *HistoricalDataBroker) Listen(f HistoricalDataAction) {
 
 func (h *HistoricalDataBroker) ReadHistoricalData(version string) {
 	var d HistoricalData
-	var err error
 
-	d.Rid, err = h.ReadString()
-	d.Start, err = h.ReadString()
-	d.End, err = h.ReadString()
-	d.Count, err = h.ReadInt()
+	d.Rid, _ = h.ReadString()
+	d.Start, _ = h.ReadString()
+	d.End, _ = h.ReadString()
+	d.Count, _ = h.ReadInt()
 
 	d.Data = make([]HistoricalDataItem, d.Count)
 
 	for i := range d.Data {
-		d.Data[i].Date, err = h.ReadString()
-		d.Data[i].Open, err = h.ReadFloat()
-		d.Data[i].High, err = h.ReadFloat()
-		d.Data[i].Low, err = h.ReadFloat()
-		d.Data[i].Close, err = h.ReadFloat()
-		d.Data[i].Volume, err = h.ReadInt()
-		d.Data[i].WAP, err = h.ReadFloat()
-		d.Data[i].HasGaps, err = h.ReadBool()
-		d.Data[i].BarCount, err = h.ReadInt()
-
-		if err != nil {
-			h.HistoricalDataChan <- d
-			break
-		}
+		d.Data[i].Date, _ = h.ReadString()
+		d.Data[i].Open, _ = h.ReadFloat()
+		d.Data[i].High, _ = h.ReadFloat()
+		d.Data[i].Low, _ = h.ReadFloat()
+		d.Data[i].Close, _ = h.ReadFloat()
+		d.Data[i].Volume, _ = h.ReadInt()
+		d.Data[i].WAP, _ = h.ReadFloat()
+		d.Data[i].HasGaps, _ = h.ReadBool()
+		d.Data[i].BarCount, _ = h.ReadInt()
 	}
 
-	if err == nil {
-		h.HistoricalDataChan <- d
-	}
+	h.HistoricalDataChan <- d
 }
