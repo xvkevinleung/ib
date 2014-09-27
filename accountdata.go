@@ -46,10 +46,10 @@ func NewAccountDataBroker() AccountDataBroker {
 	return a
 }
 
-func (a *AccountDataBroker) SendRequest(d AccountDataRequest) {
+func (a *AccountDataBroker) SendRequest(rid int64, d AccountDataRequest) {
 	a.WriteInt(REQUEST.CODE.ACCOUNT_VALUE)
 	a.WriteInt(REQUEST.VERSION.ACCOUNT_VALUE)
-	a.WriteInt(a.NextReqId())
+	a.WriteInt(rid)
 	a.WriteBool(d.Subscribe)
 	a.WriteString(d.AccountCode)
 

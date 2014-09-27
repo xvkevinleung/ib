@@ -50,10 +50,10 @@ func NewContractDetailsBroker() ContractDetailsBroker {
 	return c
 }
 
-func (d *ContractDetailsBroker) SendRequest(c Contract) {
+func (d *ContractDetailsBroker) SendRequest(rid int64, c Contract) {
 	d.WriteInt(REQUEST.CODE.CONTRACT_DATA)
 	d.WriteInt(REQUEST.VERSION.CONTRACT_DATA)
-	d.WriteInt(d.NextReqId())
+	d.WriteInt(rid)
 	d.WriteInt(c.ContractId)
 	d.WriteString(c.Symbol)
 	d.WriteString(c.SecurityType)

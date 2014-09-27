@@ -82,10 +82,10 @@ func NewMarketDataBroker() MarketDataBroker {
 	return m
 }
 
-func (m *MarketDataBroker) SendRequest(c Contract) {
+func (m *MarketDataBroker) SendRequest(rid int64, c Contract) {
 	m.WriteInt(REQUEST.CODE.MARKET_DATA)
 	m.WriteInt(REQUEST.VERSION.MARKET_DATA)
-	m.WriteInt(m.NextReqId())
+	m.WriteInt(rid)
 	m.WriteInt(c.ContractId)
 	m.WriteString(c.Symbol)
 	m.WriteString(c.SecurityType)
