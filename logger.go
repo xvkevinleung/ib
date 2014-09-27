@@ -21,3 +21,8 @@ func (l *IBLog) PrintFloat(status string, message float64) {
 	t := time.Now().Format("2006/01/02 15:04:05")
 	l.L.Printf("%s\t%s\t%f\n", t, status, message)
 }
+
+func (l *IBLog) PrintInt(status string, message int64) {
+	t := time.Now().Format("2006/01/02 15:04:05")
+	l.L.Printf("%s\t%s\t%d\n", t, status, message)
+}
