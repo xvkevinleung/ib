@@ -54,7 +54,7 @@
 			<tr>
 				<td>Orders</td>
 				<td>OrderBroker</td>
-				<td>order.go</td>
+				<td>orderbroker.go</td>
 			</tr>
 		</tbody>
 	</table>
