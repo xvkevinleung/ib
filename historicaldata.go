@@ -1,5 +1,7 @@
 package ib
 
+// NOTE: interactive brokers historical data is on central time
+
 type HistoricalDataRequest struct {
 	Con   Contract
 	End   string
@@ -40,10 +42,10 @@ func NewHistoricalDataBroker() HistoricalDataBroker {
 	return h
 }
 
-func (h *HistoricalDataBroker) SendRequest(d HistoricalDataRequest) {
+func (h *HistoricalDataBroker) SendRequest(rid int64, d HistoricalDataRequest) {
 	h.WriteInt(REQUEST.CODE.HISTORICAL_DATA)
 	h.WriteInt(REQUEST.VERSION.HISTORICAL_DATA)
-	h.WriteInt(h.NextReqId())
+	h.WriteInt(rid)
 	h.WriteInt(d.Con.ContractId)
 	h.WriteString(d.Con.Symbol)
 	h.WriteString(d.Con.SecurityType)
