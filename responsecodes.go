@@ -7,24 +7,26 @@ type ResponseHeader struct {
 }
 
 type ResponseCodes struct {
-	ERR_MSG                 string
-	CONTRACT_DATA           string
-	TICK_PRICE              string
-	TICK_SIZE               string
-	TICK_OPTION_COMPUTATION string
-	TICK_GENERIC            string
-	TICK_STRING             string
-	TICK_EFP                string
-	TICK_SNAPSHOT_END       string
-	MARKET_DATA_TYPE        string
-	HISTORICAL_DATA         string
-	ACCOUNT_VALUE           string
-	PORTFOLIO_VALUE         string
-	ACCOUNT_UPDATE_TIME     string
-	ORDER_STATUS string
-	OPEN_ORDER string
-	OPEN_ORDER_END string
-	NEXT_VALID_ID string
+	ERR_MSG                  string
+	CONTRACT_DATA            string
+	TICK_PRICE               string
+	TICK_SIZE                string
+	TICK_OPTION_COMPUTATION  string
+	TICK_GENERIC             string
+	TICK_STRING              string
+	TICK_EFP                 string
+	TICK_SNAPSHOT_END        string
+	MARKET_DATA_TYPE         string
+	MARKET_DEPTH string
+	MARKET_DEPTH_LEVEL_TWO string
+	HISTORICAL_DATA          string
+	ACCOUNT_VALUE            string
+	PORTFOLIO_VALUE          string
+	ACCOUNT_UPDATE_TIME      string
+	ORDER_STATUS             string
+	OPEN_ORDER               string
+	OPEN_ORDER_END           string
+	NEXT_VALID_ID            string
 	DELTA_NEUTRAL_VALIDATION string
 }
 
@@ -39,6 +41,8 @@ func init() {
 	RESPONSE.CODE.TICK_EFP = "47"
 	RESPONSE.CODE.TICK_SNAPSHOT_END = "57"
 	RESPONSE.CODE.MARKET_DATA_TYPE = "58"
+	RESPONSE.CODE.MARKET_DEPTH = "12"
+	RESPONSE.CODE.MARKET_DEPTH_LEVEL_TWO = "13"
 	RESPONSE.CODE.HISTORICAL_DATA = "17"
 	RESPONSE.CODE.ACCOUNT_VALUE = "6"
 	RESPONSE.CODE.PORTFOLIO_VALUE = "7"

@@ -89,8 +89,8 @@ func (d *ContractDetailsBroker) Listen(f ContractDetailsAction) {
 
 			if err != nil {
 				continue
-			} 
-			
+			}
+
 			d.ReadContractDetailsData(version)
 		}
 	}

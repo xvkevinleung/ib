@@ -11,6 +11,12 @@ type MarketDataBroker struct {
 	MarketDataTypeChan chan MarketDataType
 }
 
+type MarketDataRequest struct {
+	Con Contract
+	GenericTickList string
+	Snapshot bool
+}
+
 type TickPrice struct {
 	Rid            string
 	TickType       int64
@@ -82,25 +88,25 @@ func NewMarketDataBroker() MarketDataBroker {
 	return m
 }
 
-func (m *MarketDataBroker) SendRequest(rid int64, c Contract) {
+func (m *MarketDataBroker) SendRequest(rid int64, d MarketDataRequest) {
 	m.WriteInt(REQUEST.CODE.MARKET_DATA)
 	m.WriteInt(REQUEST.VERSION.MARKET_DATA)
 	m.WriteInt(rid)
-	m.WriteInt(c.ContractId)
-	m.WriteString(c.Symbol)
-	m.WriteString(c.SecurityType)
-	m.WriteString(c.Expiry)
-	m.WriteFloat(c.Strike)
-	m.WriteString(c.Right)
-	m.WriteString(c.Multiplier)
-	m.WriteString(c.Exchange)
-	m.WriteString(c.PrimaryExchange)
-	m.WriteString(c.Currency)
-	m.WriteString(c.LocalSymbol)
-	m.WriteString(c.TradingClass)
+	m.WriteInt(d.Con.ContractId)
+	m.WriteString(d.Con.Symbol)
+	m.WriteString(d.Con.SecurityType)
+	m.WriteString(d.Con.Expiry)
+	m.WriteFloat(d.Con.Strike)
+	m.WriteString(d.Con.Right)
+	m.WriteString(d.Con.Multiplier)
+	m.WriteString(d.Con.Exchange)
+	m.WriteString(d.Con.PrimaryExchange)
+	m.WriteString(d.Con.Currency)
+	m.WriteString(d.Con.LocalSymbol)
+	m.WriteString(d.Con.TradingClass)
 	m.WriteBool(false) // underlying
-	m.WriteString(c.GenericTickList)
-	m.WriteBool(c.Snapshot)
+	m.WriteString(d.GenericTickList)
+	m.WriteBool(d.Snapshot)
 
 	m.Broker.SendRequest()
 }
@@ -122,26 +128,26 @@ func (m *MarketDataBroker) Listen(f MarketDataAction) {
 
 			if err != nil {
 				continue
-			} 
-			
+			}
+
 			switch b {
-				case RESPONSE.CODE.TICK_PRICE:
-					m.ReadTickPrice(b, version)
-				case RESPONSE.CODE.TICK_SIZE:
-					m.ReadTickSize(b, version)
-				case RESPONSE.CODE.TICK_OPTION_COMPUTATION:
-					m.ReadTickOptComp(b, version)
-				case RESPONSE.CODE.TICK_GENERIC:
-					m.ReadTickGeneric(b, version)
-				case RESPONSE.CODE.TICK_STRING:
-					m.ReadTickString(b, version)
-				case RESPONSE.CODE.TICK_EFP:
-					m.ReadTickEFP(b, version)
-				case RESPONSE.CODE.TICK_SNAPSHOT_END:
-				case RESPONSE.CODE.MARKET_DATA_TYPE:
-					m.ReadMarketDataType(b, version)
-				default:
-					m.ReadString()
+			case RESPONSE.CODE.TICK_PRICE:
+				m.ReadTickPrice(b, version)
+			case RESPONSE.CODE.TICK_SIZE:
+				m.ReadTickSize(b, version)
+			case RESPONSE.CODE.TICK_OPTION_COMPUTATION:
+				m.ReadTickOptComp(b, version)
+			case RESPONSE.CODE.TICK_GENERIC:
+				m.ReadTickGeneric(b, version)
+			case RESPONSE.CODE.TICK_STRING:
+				m.ReadTickString(b, version)
+			case RESPONSE.CODE.TICK_EFP:
+				m.ReadTickEFP(b, version)
+			case RESPONSE.CODE.TICK_SNAPSHOT_END:
+			case RESPONSE.CODE.MARKET_DATA_TYPE:
+				m.ReadMarketDataType(b, version)
+			default:
+				m.ReadString()
 			}
 		}
 	}

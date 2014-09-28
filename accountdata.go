@@ -73,15 +73,15 @@ func (a *AccountDataBroker) Listen(f AccountDataAction) {
 
 			if err != nil {
 				continue
-			} 
-			
+			}
+
 			switch b {
-				case RESPONSE.CODE.ACCOUNT_VALUE:
-					a.ReadAccountValueData(b, version)
-				case RESPONSE.CODE.PORTFOLIO_VALUE:
-					a.ReadPortfolioData(b, version)
-				case RESPONSE.CODE.ACCOUNT_UPDATE_TIME:
-					a.ReadAccountUpdateTime(b, version)
+			case RESPONSE.CODE.ACCOUNT_VALUE:
+				a.ReadAccountValueData(b, version)
+			case RESPONSE.CODE.PORTFOLIO_VALUE:
+				a.ReadPortfolioData(b, version)
+			case RESPONSE.CODE.ACCOUNT_UPDATE_TIME:
+				a.ReadAccountUpdateTime(b, version)
 			}
 		}
 	}

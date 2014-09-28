@@ -6,7 +6,7 @@ import (
 	"net"
 	"strconv"
 	"strings"
-//	"errors"
+	//	"errors"
 )
 
 type Broker struct {
@@ -76,7 +76,7 @@ func (b *Broker) SendRequest() (int, error) {
 // func (b *Broker) Listen() {
 // 	for {
 // 		d, err := b.ReadString()
-// 
+//
 // 		if err != nil {
 // 			continue
 // 		}
@@ -115,8 +115,8 @@ func (b *Broker) ReadString() (string, error) {
 	str, err := b.InStream.ReadString(DELIM_BYTE)
 	if err != nil {
 		return "", err
-	} 
-	
+	}
+
 	return strings.TrimRight(str, DELIM_STR), err
 }
 
@@ -125,8 +125,8 @@ func (b *Broker) ReadInt() (int64, error) {
 
 	if err != nil {
 		return 0, err
-	} 
-	
+	}
+
 	return strconv.ParseInt(strings.TrimRight(str, DELIM_STR), 10, 64)
 }
 
@@ -136,7 +136,7 @@ func (b *Broker) ReadFloat() (float64, error) {
 	if err != nil {
 		return 0, err
 	}
-	
+
 	return strconv.ParseFloat(strings.TrimRight(str, DELIM_STR), 64)
 }
 
@@ -146,7 +146,7 @@ func (b *Broker) ReadBool() (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	
+
 	if int != 0 {
 		return true, err
 	}

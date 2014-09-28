@@ -19,6 +19,4 @@ type Contract struct {
 	//	ComboLegsDescription string
 	//	ComboLegs []ComboLeg
 	//	UnderComp UnderComp
-	GenericTickList string
-	Snapshot        bool
 }

@@ -2,6 +2,11 @@ package ib
 
 // NOTE: interactive brokers historical data is on central time
 
+type HistoricalDataBroker struct {
+	Broker
+	HistoricalDataChan chan HistoricalData
+}
+
 type HistoricalDataRequest struct {
 	Con   Contract
 	End   string
@@ -30,11 +35,6 @@ type HistoricalData struct {
 	End   string
 	Count int64
 	Data  []HistoricalDataItem
-}
-
-type HistoricalDataBroker struct {
-	Broker
-	HistoricalDataChan chan HistoricalData
 }
 
 func NewHistoricalDataBroker() HistoricalDataBroker {
@@ -87,7 +87,7 @@ func (h *HistoricalDataBroker) Listen(f HistoricalDataAction) {
 			if err != nil {
 				continue
 			}
-				
+
 			h.ReadHistoricalData(version)
 		}
 	}
