@@ -56,6 +56,11 @@
 				<td>OrderBroker</td>
 				<td>orderbroker.go</td>
 			</tr>
+			<tr>
+				<td>Market Depth</td>
+				<td>MarketDepthBroker</td>
+				<td>marketdepth.go</td>
+			</tr>
 		</tbody>
 	</table>
 	

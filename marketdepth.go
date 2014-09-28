@@ -52,11 +52,9 @@ func (m *MarketDepthBroker) SendRequest(rid int64, d MarketDepthRequest) {
 	m.WriteString(d.Con.Right)
 	m.WriteString(d.Con.Multiplier)
 	m.WriteString(d.Con.Exchange)
-	m.WriteString(d.Con.PrimaryExchange)
 	m.WriteString(d.Con.Currency)
 	m.WriteString(d.Con.LocalSymbol)
 	m.WriteString(d.Con.TradingClass)
-	m.WriteBool(false) // underlying
 	m.WriteInt(d.NumRows)
 
 	m.Broker.SendRequest()
