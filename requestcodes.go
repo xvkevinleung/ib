@@ -9,7 +9,7 @@ type RequestHeader struct {
 
 type RequestCodes struct {
 	MARKET_DATA      int64
-	MARKET_DEPTH int64
+	MARKET_DEPTH     int64
 	CONTRACT_DATA    int64
 	HISTORICAL_DATA  int64
 	ACCOUNT_VALUE    int64
@@ -25,7 +25,7 @@ type RequestCodes struct {
 
 type RequestVersions struct {
 	MARKET_DATA      int64
-	MARKET_DEPTH int64
+	MARKET_DEPTH     int64
 	CONTRACT_DATA    int64
 	HISTORICAL_DATA  int64
 	ACCOUNT_VALUE    int64

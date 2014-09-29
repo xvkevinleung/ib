@@ -17,8 +17,8 @@ type ResponseCodes struct {
 	TICK_EFP                 string
 	TICK_SNAPSHOT_END        string
 	MARKET_DATA_TYPE         string
-	MARKET_DEPTH string
-	MARKET_DEPTH_LEVEL_TWO string
+	MARKET_DEPTH             string
+	MARKET_DEPTH_LEVEL_TWO   string
 	HISTORICAL_DATA          string
 	ACCOUNT_VALUE            string
 	PORTFOLIO_VALUE          string

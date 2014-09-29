@@ -2,32 +2,32 @@ package ib
 
 type MarketDepthBroker struct {
 	Broker
-	MarketDepthChan chan MarketDepth
+	MarketDepthChan         chan MarketDepth
 	MarketDepthLevelTwoChan chan MarketDepthLevelTwo
 }
 
 type MarketDepthRequest struct {
-	Con Contract
+	Con     Contract
 	NumRows int64
 }
 
 type MarketDepth struct {
-	Rid string
-	Position int64
+	Rid       string
+	Position  int64
 	Operation int64
-	Side int64
-	Price float64
-	Size int64
+	Side      int64
+	Price     float64
+	Size      int64
 }
 
 type MarketDepthLevelTwo struct {
-	Rid string
-	Position int64
+	Rid         string
+	Position    int64
 	MarketMaker string
-	Operation int64
-	Side int64
-	Price float64
-	Size int64
+	Operation   int64
+	Side        int64
+	Price       float64
+	Size        int64
 }
 
 func NewMarketDepthBroker() MarketDepthBroker {

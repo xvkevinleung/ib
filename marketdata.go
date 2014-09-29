@@ -12,9 +12,9 @@ type MarketDataBroker struct {
 }
 
 type MarketDataRequest struct {
-	Con Contract
+	Con             Contract
 	GenericTickList string
-	Snapshot bool
+	Snapshot        bool
 }
 
 type TickPrice struct {
