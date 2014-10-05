@@ -28,6 +28,7 @@ type ResponseCodes struct {
 	OPEN_ORDER_END           string
 	NEXT_VALID_ID            string
 	DELTA_NEUTRAL_VALIDATION string
+	REALTIMEBARS string
 }
 
 func init() {
@@ -52,4 +53,5 @@ func init() {
 	RESPONSE.CODE.OPEN_ORDER_END = "52"
 	RESPONSE.CODE.NEXT_VALID_ID = "9"
 	RESPONSE.CODE.DELTA_NEUTRAL_VALIDATION = "56"
+	RESPONSE.CODE.REALTIMEBARS = "50"
 }
