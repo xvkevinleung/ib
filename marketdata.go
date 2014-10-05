@@ -18,7 +18,7 @@ type MarketDataRequest struct {
 }
 
 type TickPrice struct {
-	Rid            string
+	Rid            int64
 	TickType       int64
 	Price          float64
 	Size           int64
@@ -26,13 +26,13 @@ type TickPrice struct {
 }
 
 type TickSize struct {
-	Rid      string
+	Rid     int64 
 	TickType int64
 	Size     int64
 }
 
 type TickOptComp struct {
-	Rid         string
+	Rid        int64 
 	TickType    int64
 	ImpliedVol  float64
 	Delta       float64
@@ -45,19 +45,19 @@ type TickOptComp struct {
 }
 
 type TickGeneric struct {
-	Rid      string
+	Rid     int64 
 	TickType int64
 	Value    float64
 }
 
 type TickString struct {
-	Rid      string
+	Rid     int64 
 	TickType int64
 	Value    string
 }
 
 type TickEFP struct {
-	Rid                  string
+	Rid                 int64 
 	TickType             int64
 	BasisPoints          float64
 	FormattedBasisPoints string
@@ -69,7 +69,7 @@ type TickEFP struct {
 }
 
 type MarketDataType struct {
-	Rid      string
+	Rid     int64 
 	TickType int64
 }
 
@@ -156,7 +156,7 @@ func (m *MarketDataBroker) Listen(f MarketDataAction) {
 func (m *MarketDataBroker) ReadTickPrice(code, version string) {
 	var p TickPrice
 
-	p.Rid, _ = m.ReadString()
+	p.Rid, _ = m.ReadInt()
 	p.TickType, _ = m.ReadInt()
 	p.Price, _ = m.ReadFloat()
 	p.Size, _ = m.ReadInt()
@@ -168,7 +168,7 @@ func (m *MarketDataBroker) ReadTickPrice(code, version string) {
 func (m *MarketDataBroker) ReadTickSize(code, version string) {
 	var s TickSize
 
-	s.Rid, _ = m.ReadString()
+	s.Rid, _ = m.ReadInt()
 	s.TickType, _ = m.ReadInt()
 	s.Size, _ = m.ReadInt()
 
@@ -178,7 +178,7 @@ func (m *MarketDataBroker) ReadTickSize(code, version string) {
 func (m *MarketDataBroker) ReadTickOptComp(code, version string) {
 	var o TickOptComp
 
-	o.Rid, _ = m.ReadString()
+	o.Rid, _ = m.ReadInt()
 	o.TickType, _ = m.ReadInt()
 	o.ImpliedVol, _ = m.ReadFloat()
 	o.Delta, _ = m.ReadFloat()
@@ -195,7 +195,7 @@ func (m *MarketDataBroker) ReadTickOptComp(code, version string) {
 func (m *MarketDataBroker) ReadTickGeneric(code, version string) {
 	var g TickGeneric
 
-	g.Rid, _ = m.ReadString()
+	g.Rid, _ = m.ReadInt()
 	g.TickType, _ = m.ReadInt()
 	g.Value, _ = m.ReadFloat()
 
@@ -205,7 +205,7 @@ func (m *MarketDataBroker) ReadTickGeneric(code, version string) {
 func (m *MarketDataBroker) ReadTickString(code, version string) {
 	var s TickString
 
-	s.Rid, _ = m.ReadString()
+	s.Rid, _ = m.ReadInt()
 	s.TickType, _ = m.ReadInt()
 	s.Value, _ = m.ReadString()
 
@@ -215,7 +215,7 @@ func (m *MarketDataBroker) ReadTickString(code, version string) {
 func (m *MarketDataBroker) ReadTickEFP(code, version string) {
 	var e TickEFP
 
-	e.Rid, _ = m.ReadString()
+	e.Rid, _ = m.ReadInt()
 	e.TickType, _ = m.ReadInt()
 	e.BasisPoints, _ = m.ReadFloat()
 	e.FormattedBasisPoints, _ = m.ReadString()
@@ -231,7 +231,7 @@ func (m *MarketDataBroker) ReadTickEFP(code, version string) {
 func (m *MarketDataBroker) ReadMarketDataType(code, version string) {
 	var d MarketDataType
 
-	d.Rid, _ = m.ReadString()
+	d.Rid, _ = m.ReadInt()
 	d.TickType, _ = m.ReadInt()
 
 	m.MarketDataTypeChan <- d
