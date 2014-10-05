@@ -21,7 +21,7 @@ type RequestCodes struct {
 	REQ_IDS          int64
 	EXERCISE_OPTS    int64
 	GLOBAL_CANCEL    int64
-	REALTIMEBARS int64
+	REALTIMEBARS     int64
 }
 
 type RequestVersions struct {
@@ -38,7 +38,7 @@ type RequestVersions struct {
 	REQ_IDS          int64
 	EXERCISE_OPTS    int64
 	GLOBAL_CANCEL    int64
-	REALTIMEBARS int64
+	REALTIMEBARS     int64
 }
 
 func init() {

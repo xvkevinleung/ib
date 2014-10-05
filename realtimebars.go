@@ -6,22 +6,22 @@ type RealTimeBarsBroker struct {
 }
 
 type RealTimeBarsRequest struct {
-	Con Contract
-	Bar int64
+	Con  Contract
+	Bar  int64
 	Show string // what to show
-	Rth bool // regular trading hours
-//	Opts string // use default "XYZ"
+	Rth  bool   // regular trading hours
+	//	Opts string // use default "XYZ"
 }
 
 type RealTimeBar struct {
-	Rid string
-	Time string
-	Open float64
-	High float64
-	Low float64
-	Close float64
-	Volume int64
-	WAP float64
+	Rid      string
+	Time     string
+	Open     float64
+	High     float64
+	Low      float64
+	Close    float64
+	Volume   int64
+	WAP      float64
 	BarCount int64
 }
 
@@ -59,7 +59,7 @@ func (r *RealTimeBarsBroker) Listen(f RealTimeBarsAction) {
 	go f()
 
 	for {
-		b, err := ReadString()
+		b, err := r.ReadString()
 
 		if err != nil {
 			continue

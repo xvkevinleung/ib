@@ -28,7 +28,7 @@ type ResponseCodes struct {
 	OPEN_ORDER_END           string
 	NEXT_VALID_ID            string
 	DELTA_NEUTRAL_VALIDATION string
-	REALTIMEBARS string
+	REALTIMEBARS             string
 }
 
 func init() {
