@@ -6,6 +6,9 @@ import (
 	"net"
 	"strconv"
 	"strings"
+	"math/rand"
+	"time"
+
 	//	"errors"
 )
 
@@ -18,7 +21,10 @@ type Broker struct {
 }
 
 func NextClientId() int64 {
-	CLIENT_ID_INCR += 1
+	t := time.Now().Unix()
+	rand.Seed(t)
+	CLIENT_ID_INCR = int64(rand.Intn(9999))
+
 	return CLIENT_ID_INCR
 }
 

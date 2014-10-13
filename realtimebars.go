@@ -14,7 +14,7 @@ type RealTimeBarsRequest struct {
 }
 
 type RealTimeBar struct {
-	Rid      string
+	Rid      int64
 	Time     string
 	Open     float64
 	High     float64
@@ -80,7 +80,7 @@ func (r *RealTimeBarsBroker) Listen(f RealTimeBarsAction) {
 func (r *RealTimeBarsBroker) ReadRealTimeBar(version string) {
 	var d RealTimeBar
 
-	d.Rid, _ = r.ReadString()
+	d.Rid, _ = r.ReadInt()
 	d.Time, _ = r.ReadString()
 	d.Open, _ = r.ReadFloat()
 	d.High, _ = r.ReadFloat()
