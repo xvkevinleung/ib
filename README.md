@@ -78,6 +78,7 @@
 	</pre>
 
 	<h4>"Listening" for Response Data</h4>
+	<h3>DEPRECATED - no longer using callback, simply access channel data within for-select loop</h3>
 	The <span style="font-family: monospace;">Connect</span> function must be called before attempting to communicate with the IB Gateway application.
 	Once the broker is connected, a client application can invoke the <span style="font-family: monospace;">Listen</span> function in a goroutine.
 	The <span style="font-family: monospace;">Listen</span> function accepts an anonymous callback function whose signature is parameterless and returns no values.
