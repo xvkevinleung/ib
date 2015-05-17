@@ -41,7 +41,7 @@ type TickOptComp struct {
 	Gamma       float64
 	Vega        float64
 	Theta       float64
-	SpotPrice   float64
+	UndPrice   float64
 }
 
 type TickGeneric struct {
@@ -111,11 +111,7 @@ func (m *MarketDataBroker) SendRequest(rid int64, d MarketDataRequest) {
 	m.Broker.SendRequest()
 }
 
-type MarketDataAction func()
-
-func (m *MarketDataBroker) Listen(f MarketDataAction) {
-	go f()
-
+func (m *MarketDataBroker) Listen() {
 	for {
 		b, err := m.ReadString()
 
@@ -187,7 +183,7 @@ func (m *MarketDataBroker) ReadTickOptComp(code, version string) {
 	o.Gamma, _ = m.ReadFloat()
 	o.Vega, _ = m.ReadFloat()
 	o.Theta, _ = m.ReadFloat()
-	o.SpotPrice, _ = m.ReadFloat()
+	o.UndPrice, _ = m.ReadFloat()
 
 	m.TickOptCompChan <- o
 }
