@@ -60,11 +60,7 @@ func (m *MarketDepthBroker) SendRequest(rid int64, d MarketDepthRequest) {
 	m.Broker.SendRequest()
 }
 
-type MarketDepthAction func()
-
-func (m *MarketDepthBroker) Listen(f MarketDepthAction) {
-	go f()
-
+func (m *MarketDepthBroker) Listen() {
 	for {
 		b, err := m.ReadString()
 

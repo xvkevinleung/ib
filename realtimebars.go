@@ -53,11 +53,7 @@ func (r *RealTimeBarsBroker) SendRequest(rid int64, d RealTimeBarsRequest) {
 	r.Broker.SendRequest()
 }
 
-type RealTimeBarsAction func()
-
-func (r *RealTimeBarsBroker) Listen(f RealTimeBarsAction) {
-	go f()
-
+func (r *RealTimeBarsBroker) Listen() {
 	for {
 		b, err := r.ReadString()
 

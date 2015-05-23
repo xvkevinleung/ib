@@ -69,11 +69,7 @@ func (h *HistoricalDataBroker) SendRequest(rid int64, d HistoricalDataRequest) {
 	h.Broker.SendRequest()
 }
 
-type HistoricalDataAction func()
-
-func (h *HistoricalDataBroker) Listen(f HistoricalDataAction) {
-	go f()
-
+func (h *HistoricalDataBroker) Listen() {
 	for {
 		b, err := h.ReadString()
 
