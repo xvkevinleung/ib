@@ -2,6 +2,8 @@ package ib
 
 // NOTE: interactive brokers historical data is on central time
 
+import "encoding/json"
+
 type HistoricalDataBroker struct {
 	Broker
 	HistoricalDataChan chan HistoricalData
@@ -27,6 +29,20 @@ type HistoricalDataItem struct {
 	WAP      float64
 	HasGaps  bool
 	BarCount int64
+}
+
+func (h *HistoricalDataItem) MarshalJSON() ([]byte, error) {
+	return json.Marshal(HistoricalDataItem{
+		Date:     h.Date,
+		Open:     h.Open,
+		High:     h.High,
+		Low:      h.Low,
+		Close:    h.Close,
+		Volume:   h.Volume,
+		WAP:      h.WAP,
+		HasGaps:  h.HasGaps,
+		BarCount: h.BarCount,
+	})
 }
 
 type HistoricalData struct {

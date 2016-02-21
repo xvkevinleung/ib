@@ -1,5 +1,11 @@
 package ib
 
+import (
+	"encoding/json"
+	"strconv"
+  "time"
+)
+
 type MarketDataBroker struct {
 	Broker
 	TickPriceChan      chan TickPrice
@@ -23,6 +29,50 @@ type TickPrice struct {
 	Price          float64
 	Size           int64
 	CanAutoExecute bool
+}
+
+const (
+	_     = iota // 0
+	BID          // 1
+	ASK          // 2
+	_            // 3
+	LAST         // 4
+	_            // 5
+	HIGH         // 6
+	LOW          // 7
+	_            // 8
+	CLOSE        // 9
+)
+
+func (p *TickPrice) MarshalJSON() ([]byte, error) {
+	var t string
+	switch p.TickType {
+	case BID:
+		t = "BID"
+	case ASK:
+		t = "ASK"
+	case LAST:
+		t = "LAST"
+	case HIGH:
+		t = "HIGH"
+	case LOW:
+		t = "LOW"
+	case CLOSE:
+		t = "CLOSE"
+	default:
+		t = strconv.FormatInt(p.TickType, 10)
+	}
+	return json.Marshal(struct {
+    Time string
+		TickType string
+		Price    float64
+		Size     int64
+	}{
+    Time: strconv.FormatInt(time.Now().UnixNano(), 10),
+		TickType: t,
+		Price:    p.Price,
+		Size:     p.Size,
+	})
 }
 
 type TickSize struct {
