@@ -3,11 +3,12 @@ package ib
 import (
 	"encoding/json"
 	"strconv"
-  "time"
+	"time"
 )
 
 type MarketDataBroker struct {
 	Broker
+	Contracts          map[int64]Contract
 	TickPriceChan      chan TickPrice
 	TickSizeChan       chan TickSize
 	TickOptCompChan    chan TickOptComp
@@ -44,7 +45,7 @@ const (
 	CLOSE        // 9
 )
 
-func (p *TickPrice) MarshalJSON() ([]byte, error) {
+func (m *MarketDataBroker) MarshalPrice(p *TickPrice) ([]byte, error) {
 	var t string
 	switch p.TickType {
 	case BID:
@@ -62,16 +63,26 @@ func (p *TickPrice) MarshalJSON() ([]byte, error) {
 	default:
 		t = strconv.FormatInt(p.TickType, 10)
 	}
+
+	c := m.Contracts[p.Rid]
 	return json.Marshal(struct {
-    Time string
-		TickType string
-		Price    float64
-		Size     int64
+		Time         string
+		Symbol       string
+		SecurityType string
+		Exchange     string
+		Currency     string
+		TickType     string
+		Price        float64
+		Size         int64
 	}{
-    Time: strconv.FormatInt(time.Now().UnixNano(), 10),
-		TickType: t,
-		Price:    p.Price,
-		Size:     p.Size,
+		Time:         strconv.FormatInt(time.Now().UnixNano(), 10),
+		Symbol:       c.Symbol,
+		SecurityType: c.SecurityType,
+		Exchange:     c.Exchange,
+		Currency:     c.Currency,
+		TickType:     t,
+		Price:        p.Price,
+		Size:         p.Size,
 	})
 }
 
@@ -126,6 +137,7 @@ type MarketDataType struct {
 func NewMarketDataBroker() MarketDataBroker {
 	m := MarketDataBroker{
 		Broker{},
+		make(map[int64]Contract),
 		make(chan TickPrice),
 		make(chan TickSize),
 		make(chan TickOptComp),
@@ -139,6 +151,7 @@ func NewMarketDataBroker() MarketDataBroker {
 }
 
 func (m *MarketDataBroker) SendRequest(rid int64, d MarketDataRequest) {
+	m.Contracts[rid] = d.Con
 	m.WriteInt(REQUEST.CODE.MARKET_DATA)
 	m.WriteInt(REQUEST.VERSION.MARKET_DATA)
 	m.WriteInt(rid)
