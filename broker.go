@@ -79,16 +79,6 @@ func (b *Broker) SendRequest() (int, error) {
 	return i, err
 }
 
-// func (b *Broker) Listen() {
-// 	for {
-// 		d, err := b.ReadString()
-//
-// 		if err != nil {
-// 			continue
-// 		}
-// 	}
-// }
-
 func (b *Broker) SetServerLogLevel(i int64) {
 	b.WriteInt(14)
 	b.WriteInt(1)

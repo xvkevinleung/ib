@@ -72,11 +72,7 @@ func (d *ContractDetailsBroker) SendRequest(rid int64, c Contract) {
 	d.Broker.SendRequest()
 }
 
-type ContractDetailsAction func()
-
-func (d *ContractDetailsBroker) Listen(f ContractDetailsAction) {
-	go f()
-
+func (d *ContractDetailsBroker) Listen() {
 	for {
 		b, err := d.ReadString()
 

@@ -12,7 +12,7 @@ type MarketDepthRequest struct {
 }
 
 type MarketDepth struct {
-	Rid       string
+	Rid       int64
 	Position  int64
 	Operation int64
 	Side      int64
@@ -21,7 +21,7 @@ type MarketDepth struct {
 }
 
 type MarketDepthLevelTwo struct {
-	Rid         string
+	Rid         int64
 	Position    int64
 	MarketMaker string
 	Operation   int64
@@ -90,7 +90,7 @@ func (m *MarketDepthBroker) Listen() {
 func (m *MarketDepthBroker) ReadMarketDepth(code, version string) {
 	var d MarketDepth
 
-	d.Rid, _ = m.ReadString()
+	d.Rid, _ = m.ReadInt()
 	d.Position, _ = m.ReadInt()
 	d.Operation, _ = m.ReadInt()
 	d.Side, _ = m.ReadInt()
@@ -103,7 +103,7 @@ func (m *MarketDepthBroker) ReadMarketDepth(code, version string) {
 func (m *MarketDepthBroker) ReadMarketDepthLevelTwo(code, version string) {
 	var d MarketDepthLevelTwo
 
-	d.Rid, _ = m.ReadString()
+	d.Rid, _ = m.ReadInt()
 	d.Position, _ = m.ReadInt()
 	d.MarketMaker, _ = m.ReadString()
 	d.Operation, _ = m.ReadInt()
