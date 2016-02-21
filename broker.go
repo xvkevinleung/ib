@@ -3,10 +3,10 @@ package ib
 import (
 	"bufio"
 	"bytes"
+	"math/rand"
 	"net"
 	"strconv"
 	"strings"
-	"math/rand"
 	"time"
 
 	//	"errors"

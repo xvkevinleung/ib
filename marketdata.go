@@ -26,13 +26,13 @@ type TickPrice struct {
 }
 
 type TickSize struct {
-	Rid     int64 
+	Rid      int64
 	TickType int64
 	Size     int64
 }
 
 type TickOptComp struct {
-	Rid        int64 
+	Rid         int64
 	TickType    int64
 	ImpliedVol  float64
 	Delta       float64
@@ -41,23 +41,23 @@ type TickOptComp struct {
 	Gamma       float64
 	Vega        float64
 	Theta       float64
-	UndPrice   float64
+	UndPrice    float64
 }
 
 type TickGeneric struct {
-	Rid     int64 
+	Rid      int64
 	TickType int64
 	Value    float64
 }
 
 type TickString struct {
-	Rid     int64 
+	Rid      int64
 	TickType int64
 	Value    string
 }
 
 type TickEFP struct {
-	Rid                 int64 
+	Rid                  int64
 	TickType             int64
 	BasisPoints          float64
 	FormattedBasisPoints string
@@ -69,7 +69,7 @@ type TickEFP struct {
 }
 
 type MarketDataType struct {
-	Rid     int64 
+	Rid      int64
 	TickType int64
 }
 
