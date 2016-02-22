@@ -75,7 +75,7 @@ func (m *MarketDataBroker) PriceToJSON(p *TickPrice) ([]byte, error) {
 		Price        float64
 		Size         int64
 	}{
-		Time:         strconv.FormatInt(time.Now().UnixNano(), 10),
+		Time:         strconv.FormatInt(time.Now().UTC().Add(-5*time.Hour).UnixNano(), 10),
 		Symbol:       c.Symbol,
 		SecurityType: c.SecurityType,
 		Exchange:     c.Exchange,
@@ -93,7 +93,7 @@ func (m *MarketDataBroker) PriceToCSV(p *TickPrice) string {
 	c := m.Contracts[p.Rid]
 	return fmt.Sprintf(
 		"%s,%s,%s,%s,%s,%s,%.2f,%s,%s,%.2f,%d",
-		strconv.FormatInt(time.Now().UnixNano(), 10),
+		strconv.FormatInt(time.Now().UTC().Add(-5*time.Hour).UnixNano(), 10),
 		c.Symbol,
 		c.SecurityType,
 		c.Exchange,
