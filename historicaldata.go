@@ -2,10 +2,14 @@ package ib
 
 // NOTE: interactive brokers historical data is on central time
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"fmt"
+)
 
 type HistoricalDataBroker struct {
 	Broker
+	Contract           Contract
 	HistoricalDataChan chan HistoricalData
 }
 
@@ -31,18 +35,64 @@ type HistoricalDataItem struct {
 	BarCount int64
 }
 
-func (h *HistoricalDataItem) MarshalJSON() ([]byte, error) {
-	return json.Marshal(HistoricalDataItem{
-		Date:     h.Date,
-		Open:     h.Open,
-		High:     h.High,
-		Low:      h.Low,
-		Close:    h.Close,
-		Volume:   h.Volume,
-		WAP:      h.WAP,
-		HasGaps:  h.HasGaps,
-		BarCount: h.BarCount,
+func (b *HistoricalDataBroker) DataItemToJSON(h *HistoricalDataItem) ([]byte, error) {
+	return json.Marshal(struct {
+		Date         string
+		Symbol       string
+		Exchange     string
+		SecurityType string
+		Currency     string
+		Right        string
+		Strike       float64
+		Expiry       string
+		Open         float64
+		High         float64
+		Low          float64
+		Close        float64
+		Volume       int64
+		WAP          float64
+		HasGaps      bool
+		BarCount     int64
+	}{
+		Date:         h.Date,
+		Symbol:       b.Contract.Symbol,
+		Exchange:     b.Contract.Exchange,
+		SecurityType: b.Contract.SecurityType,
+		Currency:     b.Contract.Currency,
+		Right:        b.Contract.Right,
+		Strike:       b.Contract.Strike,
+		Expiry:       b.Contract.Expiry,
+		Open:         h.Open,
+		High:         h.High,
+		Low:          h.Low,
+		Close:        h.Close,
+		Volume:       h.Volume,
+		WAP:          h.WAP,
+		HasGaps:      h.HasGaps,
+		BarCount:     h.BarCount,
 	})
+}
+
+func (b *HistoricalDataBroker) DataItemToCSV(h *HistoricalDataItem) string {
+	return fmt.Sprintf(
+		"%v,%s,%s,%s,%s,%s,%.2f,%s,%.2f,%.2f,%.2f,%.2f,%d,%.2f,%t,%d",
+		h.Date,
+		b.Contract.Symbol,
+		b.Contract.Exchange,
+		b.Contract.SecurityType,
+		b.Contract.Currency,
+		b.Contract.Right,
+		b.Contract.Strike,
+		b.Contract.Expiry,
+		h.Open,
+		h.High,
+		h.Low,
+		h.Close,
+		h.Volume,
+		h.WAP,
+		h.HasGaps,
+		h.BarCount,
+	)
 }
 
 type HistoricalData struct {
@@ -54,11 +104,12 @@ type HistoricalData struct {
 }
 
 func NewHistoricalDataBroker() HistoricalDataBroker {
-	h := HistoricalDataBroker{Broker{}, make(chan HistoricalData)}
+	h := HistoricalDataBroker{Broker{}, Contract{}, make(chan HistoricalData)}
 	return h
 }
 
 func (h *HistoricalDataBroker) SendRequest(rid int64, d HistoricalDataRequest) {
+	h.Contract = d.Con
 	h.WriteInt(REQUEST.CODE.HISTORICAL_DATA)
 	h.WriteInt(REQUEST.VERSION.HISTORICAL_DATA)
 	h.WriteInt(rid)

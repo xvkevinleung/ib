@@ -2,6 +2,7 @@ package ib
 
 import (
 	"encoding/json"
+	"fmt"
 	"strconv"
 	"time"
 )
@@ -32,38 +33,34 @@ type TickPrice struct {
 	CanAutoExecute bool
 }
 
-const (
-	_     = iota // 0
-	BID          // 1
-	ASK          // 2
-	_            // 3
-	LAST         // 4
-	_            // 5
-	HIGH         // 6
-	LOW          // 7
-	_            // 8
-	CLOSE        // 9
-)
-
-func (m *MarketDataBroker) MarshalPrice(p *TickPrice) ([]byte, error) {
-	var t string
-	switch p.TickType {
-	case BID:
-		t = "BID"
-	case ASK:
-		t = "ASK"
-	case LAST:
-		t = "LAST"
-	case HIGH:
-		t = "HIGH"
-	case LOW:
-		t = "LOW"
-	case CLOSE:
-		t = "CLOSE"
+func (m *MarketDataBroker) TickTypeToString(t int64) string {
+	switch t {
+	case 0:
+		return "BID SIZE"
+	case 1:
+		return "BID"
+	case 2:
+		return "ASK"
+	case 3:
+		return "ASK_SIZE"
+	case 4:
+		return "LAST"
+	case 5:
+		return "LAST SIZE"
+	case 6:
+		return "HIGH"
+	case 7:
+		return "LOW"
+	case 8:
+		return "VOLUME"
+	case 9:
+		return "CLOSE"
 	default:
-		t = strconv.FormatInt(p.TickType, 10)
+		return strconv.FormatInt(t, 10)
 	}
+}
 
+func (m *MarketDataBroker) PriceToJSON(p *TickPrice) ([]byte, error) {
 	c := m.Contracts[p.Rid]
 	return json.Marshal(struct {
 		Time         string
@@ -71,6 +68,9 @@ func (m *MarketDataBroker) MarshalPrice(p *TickPrice) ([]byte, error) {
 		SecurityType string
 		Exchange     string
 		Currency     string
+		Right        string
+		Strike       float64
+		Expiry       string
 		TickType     string
 		Price        float64
 		Size         int64
@@ -80,10 +80,31 @@ func (m *MarketDataBroker) MarshalPrice(p *TickPrice) ([]byte, error) {
 		SecurityType: c.SecurityType,
 		Exchange:     c.Exchange,
 		Currency:     c.Currency,
-		TickType:     t,
+		Right:        c.Right,
+		Strike:       c.Strike,
+		Expiry:       c.Expiry,
+		TickType:     m.TickTypeToString(p.TickType),
 		Price:        p.Price,
 		Size:         p.Size,
 	})
+}
+
+func (m *MarketDataBroker) PriceToCSV(p *TickPrice) string {
+	c := m.Contracts[p.Rid]
+	return fmt.Sprintf(
+		"%s,%s,%s,%s,%s,%s,%.2f,%s,%s,%.2f,%d",
+		strconv.FormatInt(time.Now().UnixNano(), 10),
+		c.Symbol,
+		c.SecurityType,
+		c.Exchange,
+		c.Currency,
+		c.Right,
+		c.Strike,
+		c.Expiry,
+		m.TickTypeToString(p.TickType),
+		p.Price,
+		p.Size,
+	)
 }
 
 type TickSize struct {
