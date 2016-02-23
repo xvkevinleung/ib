@@ -2,7 +2,7 @@ package ib
 
 import (
 	"encoding/json"
-  "fmt"
+	"fmt"
 	"strconv"
 	"time"
 )
@@ -88,21 +88,21 @@ func (m *MarketDepthBroker) DepthToJSON(d *MarketDepth) ([]byte, error) {
 func (m *MarketDepthBroker) DepthToCSV(d *MarketDepth) string {
 	c := m.Contracts[d.Rid]
 	return fmt.Sprintf(
-    "%s,%s,%s,%s,%s,%s,%.2f,%s,,%d,%s,%s,%.2f,%d",
-    strconv.FormatInt(time.Now().UTC().Add(-5*time.Hour).UnixNano(), 10),
-    c.Symbol,
-    c.SecurityType,
-    c.Exchange,
-    c.Currency,
+		"%s,%s,%s,%s,%s,%s,%.2f,%s,,%d,%s,%s,%.2f,%d",
+		strconv.FormatInt(time.Now().UTC().Add(-5*time.Hour).UnixNano(), 10),
+		c.Symbol,
+		c.SecurityType,
+		c.Exchange,
+		c.Currency,
 		c.Right,
 		c.Strike,
 		c.Expiry,
-    d.Position,
-    m.OperationToString(d.Operation),
-    m.SideToString(d.Side),
-    d.Price,
-    d.Size,
-  )
+		d.Position,
+		m.OperationToString(d.Operation),
+		m.SideToString(d.Side),
+		d.Price,
+		d.Size,
+	)
 }
 
 type MarketDepthLevelTwo struct {
