@@ -2,6 +2,7 @@ package ib
 
 import (
 	"encoding/json"
+  "fmt"
 	"strconv"
 	"time"
 )
@@ -27,29 +28,31 @@ type MarketDepth struct {
 	Size      int64
 }
 
-func (m *MarketDepthBroker) MarshalDepth(d *MarketDepth) ([]byte, error) {
-	var s string
-	switch d.Side {
+func (m *MarketDepthBroker) SideToString(s int64) string {
+	switch s {
 	case 0:
-		s = "ASK"
+		return "ASK"
 	case 1:
-		s = "BID"
+		return "BID"
 	default:
-		s = strconv.FormatInt(d.Side, 10)
+		return strconv.FormatInt(s, 10)
 	}
+}
 
-	var o string
-	switch d.Side {
+func (m *MarketDepthBroker) OperationToString(o int64) string {
+	switch o {
 	case 0:
-		o = "INSERT"
+		return "INSERT"
 	case 1:
-		o = "UPDATE"
+		return "UPDATE"
 	case 2:
-		o = "DELETE"
+		return "DELETE"
 	default:
-		o = strconv.FormatInt(d.Side, 10)
+		return strconv.FormatInt(o, 10)
 	}
+}
 
+func (m *MarketDepthBroker) DepthToJSON(d *MarketDepth) ([]byte, error) {
 	c := m.Contracts[d.Rid]
 	return json.Marshal(struct {
 		Time         string
@@ -63,17 +66,34 @@ func (m *MarketDepthBroker) MarshalDepth(d *MarketDepth) ([]byte, error) {
 		Price        float64
 		Size         int64
 	}{
-		Time:         strconv.FormatInt(time.Now().UnixNano(), 10),
+		Time:         strconv.FormatInt(time.Now().UTC().Add(-5*time.Hour).UnixNano(), 10),
 		Symbol:       c.Symbol,
 		SecurityType: c.SecurityType,
 		Exchange:     c.Exchange,
 		Currency:     c.Currency,
 		Position:     d.Position,
-		Operation:    o,
-		Side:         s,
+		Operation:    m.OperationToString(d.Operation),
+		Side:         m.SideToString(d.Side),
 		Price:        d.Price,
 		Size:         d.Size,
 	})
+}
+
+func (m *MarketDepthBroker) DepthToCSV(d *MarketDepth) string {
+	c := m.Contracts[d.Rid]
+	return fmt.Sprintf(
+    "%s,%s,%s,%s,%s,%d,%s,%s,%.2f,%d",
+    strconv.FormatInt(time.Now().UTC().Add(-5*time.Hour).UnixNano(), 10),
+    c.Symbol,
+    c.SecurityType,
+    c.Exchange,
+    c.Currency,
+    d.Position,
+    m.OperationToString(d.Operation),
+    m.SideToString(d.Side),
+    d.Price,
+    d.Size,
+  )
 }
 
 type MarketDepthLevelTwo struct {
