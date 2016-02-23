@@ -60,6 +60,9 @@ func (m *MarketDepthBroker) DepthToJSON(d *MarketDepth) ([]byte, error) {
 		SecurityType string
 		Exchange     string
 		Currency     string
+		Right        string
+		Strike       float64
+		Expiry       string
 		Position     int64
 		Operation    string
 		Side         string
@@ -71,6 +74,9 @@ func (m *MarketDepthBroker) DepthToJSON(d *MarketDepth) ([]byte, error) {
 		SecurityType: c.SecurityType,
 		Exchange:     c.Exchange,
 		Currency:     c.Currency,
+		Right:        c.Right,
+		Strike:       c.Strike,
+		Expiry:       c.Expiry,
 		Position:     d.Position,
 		Operation:    m.OperationToString(d.Operation),
 		Side:         m.SideToString(d.Side),
@@ -82,12 +88,15 @@ func (m *MarketDepthBroker) DepthToJSON(d *MarketDepth) ([]byte, error) {
 func (m *MarketDepthBroker) DepthToCSV(d *MarketDepth) string {
 	c := m.Contracts[d.Rid]
 	return fmt.Sprintf(
-    "%s,%s,%s,%s,%s,%d,%s,%s,%.2f,%d",
+    "%s,%s,%s,%s,%s,%s,%.2f,%s,,%d,%s,%s,%.2f,%d",
     strconv.FormatInt(time.Now().UTC().Add(-5*time.Hour).UnixNano(), 10),
     c.Symbol,
     c.SecurityType,
     c.Exchange,
     c.Currency,
+		c.Right,
+		c.Strike,
+		c.Expiry,
     d.Position,
     m.OperationToString(d.Operation),
     m.SideToString(d.Side),
