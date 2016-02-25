@@ -1,12 +1,20 @@
 package ib
 
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"strconv"
+	"time"
+)
+
 type TagValue struct {
 	Tag   string
 	Value string
 }
 
 type ContractDetailsData struct {
-	Rid                  string
+	Rid                  int64
 	Symbol               string
 	SecurityType         string
 	Expiry               string
@@ -39,18 +47,131 @@ type ContractDetailsData struct {
 	SecIdList            []TagValue
 }
 
+func (d *ContractDetailsBroker) DetailsToJSON(t *ContractDetailsData) ([]byte, error) {
+	r, err := json.Marshal(struct {
+		Time                 string
+		Symbol               string
+		SecurityType         string
+		Expiry               string
+		Strike               float64
+		Right                string
+		Exchange             string
+		Currency             string
+		LocalSymbol          string
+		MarketName           string
+		TradingClass         string
+		ContractId           string
+		MinTick              int64
+		Multiplier           int64
+		OrderTypes           string
+		ValidExchanges       string
+		PriceMagnifier       int64
+		UnderlyingContractId int64
+		LongName             string
+		PrimaryExchange      string
+		ContractMonth        string
+		Industry             string
+		Category             string
+		SubCategory          string
+		TimeZoneId           string
+		TradingHours         string
+		LiquidHours          string
+		EconValueRule        string
+		EconValueMultiplier  float64
+		//  	SecIdListCount       int64
+		//  	SecIdList            []TagValue
+	}{
+		Time:                 strconv.FormatInt(time.Now().UTC().Add(-5*time.Hour).UnixNano(), 10),
+		Symbol:               t.Symbol,
+		SecurityType:         t.SecurityType,
+		Expiry:               t.Expiry,
+		Strike:               t.Strike,
+		Right:                t.Right,
+		Exchange:             t.Exchange,
+		Currency:             t.Currency,
+		LocalSymbol:          t.LocalSymbol,
+		MarketName:           t.MarketName,
+		TradingClass:         t.TradingClass,
+		ContractId:           strconv.FormatInt(t.ContractId, 10),
+		MinTick:              t.MinTick,
+		Multiplier:           t.Multiplier,
+		OrderTypes:           t.OrderTypes,
+		ValidExchanges:       t.ValidExchanges,
+		PriceMagnifier:       t.PriceMagnifier,
+		UnderlyingContractId: t.UnderlyingContractId,
+		LongName:             t.LongName,
+		PrimaryExchange:      t.PrimaryExchange,
+		ContractMonth:        t.ContractMonth,
+		Industry:             t.Industry,
+		Category:             t.Category,
+		SubCategory:          t.SubCategory,
+		TimeZoneId:           t.TimeZoneId,
+		TradingHours:         t.TradingHours,
+		LiquidHours:          t.LiquidHours,
+		EconValueRule:        t.EconValueRule,
+		EconValueMultiplier:  t.EconValueMultiplier,
+		//  	SecIdListCount:       t.SecIdListCount,
+		//  	SecIdList:            t.SecIdList,
+	})
+
+	return bytes.Replace(r, []byte("\\u0026"), []byte("&"), -1), err
+}
+
+func (d *ContractDetailsBroker) DetailsToCSV(t *ContractDetailsData) string {
+	return fmt.Sprintf(
+		"%s,%s,%s,%s,%.2f,%s,%s,%s,%s,%s,%s,%d,%d,%d,%s,%s,%d,%d,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%.2f",
+		strconv.FormatInt(time.Now().UTC().Add(-5*time.Hour).UnixNano(), 10),
+		t.Symbol,
+		t.SecurityType,
+		t.Expiry,
+		t.Strike,
+		t.Right,
+		t.Exchange,
+		t.Currency,
+		t.LocalSymbol,
+		t.MarketName,
+		t.TradingClass,
+		t.ContractId,
+		t.MinTick,
+		t.Multiplier,
+		t.OrderTypes,
+		t.ValidExchanges,
+		t.PriceMagnifier,
+		t.UnderlyingContractId,
+		t.LongName,
+		t.PrimaryExchange,
+		t.ContractMonth,
+		t.Industry,
+		t.Category,
+		t.SubCategory,
+		t.TimeZoneId,
+		t.TradingHours,
+		t.LiquidHours,
+		t.EconValueRule,
+		t.EconValueMultiplier,
+		//    t.SecIdListCount,
+		//    t.SecIdList,
+	)
+}
+
 type ContractDetailsBroker struct {
 	Broker
-	DataChan chan ContractDetailsData
+	Contracts map[int64]Contract
+	DataChan  chan ContractDetailsData
 }
 
 func NewContractDetailsBroker() ContractDetailsBroker {
-	c := ContractDetailsBroker{Broker{}, make(chan ContractDetailsData)}
+	c := ContractDetailsBroker{
+		Broker{},
+		make(map[int64]Contract),
+		make(chan ContractDetailsData),
+	}
 	c.Broker.Initialize()
 	return c
 }
 
 func (d *ContractDetailsBroker) SendRequest(rid int64, c Contract) {
+	d.Contracts[rid] = c
 	d.WriteInt(REQUEST.CODE.CONTRACT_DATA)
 	d.WriteInt(REQUEST.VERSION.CONTRACT_DATA)
 	d.WriteInt(rid)
@@ -95,7 +216,7 @@ func (d *ContractDetailsBroker) Listen() {
 func (d *ContractDetailsBroker) ReadContractDetailsData(version string) {
 	var c ContractDetailsData
 
-	c.Rid, _ = d.ReadString()
+	c.Rid, _ = d.ReadInt()
 	c.Symbol, _ = d.ReadString()
 	c.SecurityType, _ = d.ReadString()
 	c.Expiry, _ = d.ReadString()
