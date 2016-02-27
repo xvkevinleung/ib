@@ -7,17 +7,44 @@ import (
 	"time"
 )
 
-type MarketDepthBroker struct {
-	Broker
-	Contracts               map[int64]Contract
-	MarketDepthChan         chan MarketDepth
-	MarketDepthLevelTwoChan chan MarketDepthLevelTwo
-}
+////////////////////////////////////////////////////////////////////////////////
+// REQUESTS
+////////////////////////////////////////////////////////////////////////////////
 
 type MarketDepthRequest struct {
-	Con     Contract
-	NumRows int64
+	Contract Contract
+	NumRows  int64
 }
+
+func init() {
+	REQUEST_CODE["MarketDepth"] = 10
+	REQUEST_VERSION["MarketDepth"] = 4
+}
+
+func (r *MarketDepthRequest) Send(id int64, b MarketDepthBroker) {
+	b.Contracts[id] = d.Contract
+	b.WriteInt(REQUEST_CODE["MarketDepth"])
+	b.WriteInt(REQUEST_VERSION["MarketDepth"])
+	b.WriteInt(rid)
+	b.WriteInt(d.Contract.ContractId)
+	b.WriteString(d.Contract.Symbol)
+	b.WriteString(d.Contract.SecurityType)
+	b.WriteString(d.Contract.Expiry)
+	b.WriteFloat(d.Contract.Strike)
+	b.WriteString(d.Contract.Right)
+	b.WriteString(d.Contract.Multiplier)
+	b.WriteString(d.Contract.Exchange)
+	b.WriteString(d.Contract.Currency)
+	b.WriteString(d.Contract.LocalSymbol)
+	b.WriteString(d.Contract.TradingClass)
+	b.WriteInt(d.NumRows)
+
+	b.Broker.SendRequest()
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// RESPONSES
+////////////////////////////////////////////////////////////////////////////////
 
 type MarketDepth struct {
 	Rid       int64
@@ -27,6 +54,106 @@ type MarketDepth struct {
 	Price     float64
 	Size      int64
 }
+
+func init() {
+	RESPONSE_CODE["MarketDepth"] = "12"
+}
+
+type MarketDepthLevelTwo struct {
+	Rid         int64
+	Position    int64
+	MarketMaker string
+	Operation   int64
+	Side        int64
+	Price       float64
+	Size        int64
+}
+
+func init() {
+	RESPONSE_CODE["MarketDepthLevelTwo"] = "13"
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// BROKER
+////////////////////////////////////////////////////////////////////////////////
+
+type MarketDepthBroker struct {
+	Broker
+	Contracts               map[int64]Contract
+	MarketDepthChan         chan MarketDepth
+	MarketDepthLevelTwoChan chan MarketDepthLevelTwo
+}
+
+func NewMarketDepthBroker() MarketDepthBroker {
+	b := MarketDepthBroker{
+		Broker{},
+		make(map[int64]Contract),
+		make(chan MarketDepth),
+		make(chan MarketDepthLevelTwo),
+	}
+
+	return b
+}
+
+// TODO restart refactoring here
+
+func (m *MarketDepthBroker) Listen() {
+	for {
+		b, err := m.ReadString()
+
+		if err != nil {
+			continue
+		}
+
+		if b != RESPONSE.CODE.ERR_MSG {
+			version, err := m.ReadString()
+
+			if err != nil {
+				continue
+			}
+
+			switch b {
+			case RESPONSE.CODE.MARKET_DEPTH:
+				m.ReadMarketDepth(b, version)
+			case RESPONSE.CODE.MARKET_DEPTH_LEVEL_TWO:
+				m.ReadMarketDepthLevelTwo(b, version)
+			default:
+				m.ReadString()
+			}
+		}
+	}
+}
+
+func (m *MarketDepthBroker) ReadMarketDepth(code, version string) {
+	var d MarketDepth
+
+	d.Rid, _ = m.ReadInt()
+	d.Position, _ = m.ReadInt()
+	d.Operation, _ = m.ReadInt()
+	d.Side, _ = m.ReadInt()
+	d.Price, _ = m.ReadFloat()
+	d.Size, _ = m.ReadInt()
+
+	m.MarketDepthChan <- d
+}
+
+func (m *MarketDepthBroker) ReadMarketDepthLevelTwo(code, version string) {
+	var d MarketDepthLevelTwo
+
+	d.Rid, _ = m.ReadInt()
+	d.Position, _ = m.ReadInt()
+	d.MarketMaker, _ = m.ReadString()
+	d.Operation, _ = m.ReadInt()
+	d.Side, _ = m.ReadInt()
+	d.Price, _ = m.ReadFloat()
+	d.Size, _ = m.ReadInt()
+
+	m.MarketDepthLevelTwoChan <- d
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// SERIALIZERS
+////////////////////////////////////////////////////////////////////////////////
 
 func (m *MarketDepthBroker) SideToString(s int64) string {
 	switch s {
@@ -103,100 +230,4 @@ func (m *MarketDepthBroker) DepthToCSV(d *MarketDepth) string {
 		d.Price,
 		d.Size,
 	)
-}
-
-type MarketDepthLevelTwo struct {
-	Rid         int64
-	Position    int64
-	MarketMaker string
-	Operation   int64
-	Side        int64
-	Price       float64
-	Size        int64
-}
-
-func NewMarketDepthBroker() MarketDepthBroker {
-	m := MarketDepthBroker{
-		Broker{},
-		make(map[int64]Contract),
-		make(chan MarketDepth),
-		make(chan MarketDepthLevelTwo),
-	}
-
-	return m
-}
-
-func (m *MarketDepthBroker) SendRequest(rid int64, d MarketDepthRequest) {
-	m.Contracts[rid] = d.Con
-	m.WriteInt(REQUEST.CODE.MARKET_DEPTH)
-	m.WriteInt(REQUEST.VERSION.MARKET_DEPTH)
-	m.WriteInt(rid)
-	m.WriteInt(d.Con.ContractId)
-	m.WriteString(d.Con.Symbol)
-	m.WriteString(d.Con.SecurityType)
-	m.WriteString(d.Con.Expiry)
-	m.WriteFloat(d.Con.Strike)
-	m.WriteString(d.Con.Right)
-	m.WriteString(d.Con.Multiplier)
-	m.WriteString(d.Con.Exchange)
-	m.WriteString(d.Con.Currency)
-	m.WriteString(d.Con.LocalSymbol)
-	m.WriteString(d.Con.TradingClass)
-	m.WriteInt(d.NumRows)
-
-	m.Broker.SendRequest()
-}
-
-func (m *MarketDepthBroker) Listen() {
-	for {
-		b, err := m.ReadString()
-
-		if err != nil {
-			continue
-		}
-
-		if b != RESPONSE.CODE.ERR_MSG {
-			version, err := m.ReadString()
-
-			if err != nil {
-				continue
-			}
-
-			switch b {
-			case RESPONSE.CODE.MARKET_DEPTH:
-				m.ReadMarketDepth(b, version)
-			case RESPONSE.CODE.MARKET_DEPTH_LEVEL_TWO:
-				m.ReadMarketDepthLevelTwo(b, version)
-			default:
-				m.ReadString()
-			}
-		}
-	}
-}
-
-func (m *MarketDepthBroker) ReadMarketDepth(code, version string) {
-	var d MarketDepth
-
-	d.Rid, _ = m.ReadInt()
-	d.Position, _ = m.ReadInt()
-	d.Operation, _ = m.ReadInt()
-	d.Side, _ = m.ReadInt()
-	d.Price, _ = m.ReadFloat()
-	d.Size, _ = m.ReadInt()
-
-	m.MarketDepthChan <- d
-}
-
-func (m *MarketDepthBroker) ReadMarketDepthLevelTwo(code, version string) {
-	var d MarketDepthLevelTwo
-
-	d.Rid, _ = m.ReadInt()
-	d.Position, _ = m.ReadInt()
-	d.MarketMaker, _ = m.ReadString()
-	d.Operation, _ = m.ReadInt()
-	d.Side, _ = m.ReadInt()
-	d.Price, _ = m.ReadFloat()
-	d.Size, _ = m.ReadInt()
-
-	m.MarketDepthLevelTwoChan <- d
 }
