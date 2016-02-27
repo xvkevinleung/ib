@@ -7,19 +7,50 @@ import (
 	"time"
 )
 
-type RealTimeBarsBroker struct {
-	Broker
-	Contracts       map[int64]Contract
-	RealTimeBarChan chan RealTimeBar
-}
+////////////////////////////////////////////////////////////////////////////////
+// REQUESTS
+////////////////////////////////////////////////////////////////////////////////
 
 type RealTimeBarsRequest struct {
-	Con  Contract
-	Bar  int64
-	Show string // what to show
-	Rth  bool   // regular trading hours
-	Opts string // use default "XYZ"
+	Contract Contract
+	Bar      int64
+	Show     string // what to show
+	Rth      bool   // regular trading hours
+	Opts     string // use default "XYZ"
 }
+
+func init() {
+	REQUEST_CODE["RealTimeBars"] = 50
+	REQUEST_VERSION["RealTimeBars"] = 2
+}
+
+func (r *RealTimeBarsRequest) SendRequest(id int64, b *RealTimeBarsBroker) {
+	b.Contracts[id] = r.Contract
+	b.WriteInt(REQUEST.CODE.REALTIMEBARS)
+	b.WriteInt(REQUEST.VERSION.REALTIMEBARS)
+	b.WriteInt(id)
+	b.WriteInt(r.Contract.ContractId)
+	b.WriteString(r.Contract.Symbol)
+	b.WriteString(r.Contract.SecurityType)
+	b.WriteString(r.Contract.Expiry)
+	b.WriteFloat(r.Contract.Strike)
+	b.WriteString(r.Contract.Right)
+	b.WriteString(r.Contract.Multiplier)
+	b.WriteString(r.Contract.Exchange)
+	b.WriteString(r.Contract.PrimaryExchange)
+	b.WriteString(r.Contract.Currency)
+	b.WriteString(r.Contract.LocalSymbol)
+	b.WriteString(r.Contract.TradingClass)
+	b.WriteInt(r.Bar)
+	b.WriteString(r.Show)
+	b.WriteBool(r.Rth)
+
+	b.Broker.SendRequest()
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// RESPONSES
+////////////////////////////////////////////////////////////////////////////////
 
 type RealTimeBar struct {
 	Rid      int64
@@ -33,8 +64,72 @@ type RealTimeBar struct {
 	BarCount int64
 }
 
-func (r *RealTimeBarsBroker) BarToJSON(b *RealTimeBar) ([]byte, error) {
-	c := r.Contracts[b.Rid]
+func init() {
+	RESPONSE_CODE["RealTimeBar"] = "50"
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// BROKER
+////////////////////////////////////////////////////////////////////////////////
+
+type RealTimeBarsBroker struct {
+	Broker
+	Contracts       map[int64]Contract
+	RealTimeBarChan chan RealTimeBar
+}
+
+func NewRealTimeBarsBroker() RealTimeBarsBroker {
+	b := RealTimeBarsBroker{
+		Broker{},
+		make(map[int64]Contract),
+		make(chan RealTimeBar),
+	}
+
+	return b
+}
+
+func (b *RealTimeBarsBroker) Listen() {
+	for {
+		s, err := b.ReadString()
+
+		if err != nil {
+			continue
+		}
+
+		if s == RESPONSE.CODE.REALTIMEBARS {
+			version, err := b.ReadString()
+
+			if err != nil {
+				continue
+			}
+
+			b.ReadRealTimeBar(version)
+		}
+	}
+}
+
+func (b *RealTimeBarsBroker) ReadRealTimeBar(version string) {
+	var r RealTimeBar
+
+	r.Rid, _ = b.ReadInt()
+	r.Time, _ = b.ReadString()
+	r.Open, _ = b.ReadFloat()
+	r.High, _ = b.ReadFloat()
+	r.Low, _ = b.ReadFloat()
+	r.Close, _ = b.ReadFloat()
+	r.Volume, _ = b.ReadInt()
+	r.WAP, _ = b.ReadFloat()
+	r.BarCount, _ = b.ReadInt()
+
+	b.RealTimeBarChan <- r
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// SERIALIZERS
+////////////////////////////////////////////////////////////////////////////////
+
+func (b *RealTimeBarsBroker) RealTimeBarToJSON(d *RealTimeBar) ([]byte, error) {
+	c := b.Contracts[d.Rid]
 	return json.Marshal(struct {
 		Time         string
 		Symbol       string
@@ -61,19 +156,19 @@ func (r *RealTimeBarsBroker) BarToJSON(b *RealTimeBar) ([]byte, error) {
 		Right:        c.Right,
 		Strike:       c.Strike,
 		Expiry:       c.Expiry,
-		BarTime:      b.Time,
-		Open:         b.Open,
-		High:         b.High,
-		Low:          b.Low,
-		Close:        b.Close,
-		Volume:       b.Volume,
-		WAP:          b.WAP,
-		BarCount:     b.BarCount,
+		BarTime:      d.Time,
+		Open:         d.Open,
+		High:         d.High,
+		Low:          d.Low,
+		Close:        d.Close,
+		Volume:       d.Volume,
+		WAP:          d.WAP,
+		BarCount:     d.BarCount,
 	})
 }
 
-func (r *RealTimeBarsBroker) BarToCSV(b *RealTimeBar) string {
-	c := r.Contracts[b.Rid]
+func (b *RealTimeBarsBroker) RealTimeBarToCSV(d *RealTimeBar) string {
+	c := b.Contracts[d.Rid]
 	return fmt.Sprintf(
 		"%s,%s,%s,%s,%s,%s,%.2f,%s,%s,%.2f,%.2f,%.2f,%.2f,%d,%.2f,%d",
 		strconv.FormatInt(time.Now().UTC().Add(-5*time.Hour).UnixNano(), 10),
@@ -84,83 +179,13 @@ func (r *RealTimeBarsBroker) BarToCSV(b *RealTimeBar) string {
 		c.Right,
 		c.Strike,
 		c.Expiry,
-		b.Time,
-		b.Open,
-		b.High,
-		b.Low,
-		b.Close,
-		b.Volume,
-		b.WAP,
-		b.BarCount,
+		d.Time,
+		d.Open,
+		d.High,
+		d.Low,
+		d.Close,
+		d.Volume,
+		d.WAP,
+		d.BarCount,
 	)
-}
-
-func NewRealTimeBarsBroker() RealTimeBarsBroker {
-	r := RealTimeBarsBroker{
-		Broker{},
-		make(map[int64]Contract),
-		make(chan RealTimeBar),
-	}
-
-	return r
-}
-
-func (r *RealTimeBarsBroker) SendRequest(rid int64, d RealTimeBarsRequest) {
-	r.Contracts[rid] = d.Con
-	r.WriteInt(REQUEST.CODE.REALTIMEBARS)
-	r.WriteInt(REQUEST.VERSION.REALTIMEBARS)
-	r.WriteInt(rid)
-	r.WriteInt(d.Con.ContractId)
-	r.WriteString(d.Con.Symbol)
-	r.WriteString(d.Con.SecurityType)
-	r.WriteString(d.Con.Expiry)
-	r.WriteFloat(d.Con.Strike)
-	r.WriteString(d.Con.Right)
-	r.WriteString(d.Con.Multiplier)
-	r.WriteString(d.Con.Exchange)
-	r.WriteString(d.Con.PrimaryExchange)
-	r.WriteString(d.Con.Currency)
-	r.WriteString(d.Con.LocalSymbol)
-	r.WriteString(d.Con.TradingClass)
-	r.WriteInt(d.Bar)
-	r.WriteString(d.Show)
-	r.WriteBool(d.Rth)
-
-	r.Broker.SendRequest()
-}
-
-func (r *RealTimeBarsBroker) Listen() {
-	for {
-		b, err := r.ReadString()
-
-		if err != nil {
-			continue
-		}
-
-		if b == RESPONSE.CODE.REALTIMEBARS {
-			version, err := r.ReadString()
-
-			if err != nil {
-				continue
-			}
-
-			r.ReadRealTimeBar(version)
-		}
-	}
-}
-
-func (r *RealTimeBarsBroker) ReadRealTimeBar(version string) {
-	var d RealTimeBar
-
-	d.Rid, _ = r.ReadInt()
-	d.Time, _ = r.ReadString()
-	d.Open, _ = r.ReadFloat()
-	d.High, _ = r.ReadFloat()
-	d.Low, _ = r.ReadFloat()
-	d.Close, _ = r.ReadFloat()
-	d.Volume, _ = r.ReadInt()
-	d.WAP, _ = r.ReadFloat()
-	d.BarCount, _ = r.ReadInt()
-
-	r.RealTimeBarChan <- d
 }
