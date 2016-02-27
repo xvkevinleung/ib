@@ -15,7 +15,7 @@ import (
 type Broker struct {
 	ClientId  int64
 	Conn      net.Conn
-	Rid     int64
+	Rid       int64
 	OutStream *bytes.Buffer
 	InStream  *bufio.Reader
 }
