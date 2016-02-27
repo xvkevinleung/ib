@@ -22,22 +22,22 @@ func init() {
 }
 
 func (r *MarketDepthRequest) Send(id int64, b MarketDepthBroker) {
-	b.Contracts[id] = d.Contract
+	b.Contracts[id] = r.Contract
 	b.WriteInt(REQUEST_CODE["MarketDepth"])
 	b.WriteInt(REQUEST_VERSION["MarketDepth"])
-	b.WriteInt(rid)
-	b.WriteInt(d.Contract.ContractId)
-	b.WriteString(d.Contract.Symbol)
-	b.WriteString(d.Contract.SecurityType)
-	b.WriteString(d.Contract.Expiry)
-	b.WriteFloat(d.Contract.Strike)
-	b.WriteString(d.Contract.Right)
-	b.WriteString(d.Contract.Multiplier)
-	b.WriteString(d.Contract.Exchange)
-	b.WriteString(d.Contract.Currency)
-	b.WriteString(d.Contract.LocalSymbol)
-	b.WriteString(d.Contract.TradingClass)
-	b.WriteInt(d.NumRows)
+	b.WriteInt(id)
+	b.WriteInt(r.Contract.ContractId)
+	b.WriteString(r.Contract.Symbol)
+	b.WriteString(r.Contract.SecurityType)
+	b.WriteString(r.Contract.Expiry)
+	b.WriteFloat(r.Contract.Strike)
+	b.WriteString(r.Contract.Right)
+	b.WriteString(r.Contract.Multiplier)
+	b.WriteString(r.Contract.Exchange)
+	b.WriteString(r.Contract.Currency)
+	b.WriteString(r.Contract.LocalSymbol)
+	b.WriteString(r.Contract.TradingClass)
+	b.WriteInt(r.NumRows)
 
 	b.Broker.SendRequest()
 }
@@ -95,67 +95,65 @@ func NewMarketDepthBroker() MarketDepthBroker {
 	return b
 }
 
-// TODO restart refactoring here
-
-func (m *MarketDepthBroker) Listen() {
+func (b *MarketDepthBroker) Listen() {
 	for {
-		b, err := m.ReadString()
+		s, err := b.ReadString()
 
 		if err != nil {
 			continue
 		}
 
-		if b != RESPONSE.CODE.ERR_MSG {
-			version, err := m.ReadString()
+		if s != RESPONSE.CODE.ERR_MSG {
+			version, err := b.ReadString()
 
 			if err != nil {
 				continue
 			}
 
-			switch b {
-			case RESPONSE.CODE.MARKET_DEPTH:
-				m.ReadMarketDepth(b, version)
-			case RESPONSE.CODE.MARKET_DEPTH_LEVEL_TWO:
-				m.ReadMarketDepthLevelTwo(b, version)
+			switch s {
+			case RESPONSE_CODE["MarketDepth"]:
+				b.ReadMarketDepth(s, version)
+			case RESPONSE_CODE["MarketDepthLevelTwo"]:
+				b.ReadMarketDepthLevelTwo(s, version)
 			default:
-				m.ReadString()
+				b.ReadString()
 			}
 		}
 	}
 }
 
-func (m *MarketDepthBroker) ReadMarketDepth(code, version string) {
-	var d MarketDepth
+func (b *MarketDepthBroker) ReadMarketDepth(code, version string) {
+	var r MarketDepth
 
-	d.Rid, _ = m.ReadInt()
-	d.Position, _ = m.ReadInt()
-	d.Operation, _ = m.ReadInt()
-	d.Side, _ = m.ReadInt()
-	d.Price, _ = m.ReadFloat()
-	d.Size, _ = m.ReadInt()
+	r.Rid, _ = b.ReadInt()
+	r.Position, _ = b.ReadInt()
+	r.Operation, _ = b.ReadInt()
+	r.Side, _ = b.ReadInt()
+	r.Price, _ = b.ReadFloat()
+	r.Size, _ = b.ReadInt()
 
-	m.MarketDepthChan <- d
+	b.MarketDepthChan <- r
 }
 
-func (m *MarketDepthBroker) ReadMarketDepthLevelTwo(code, version string) {
-	var d MarketDepthLevelTwo
+func (b *MarketDepthBroker) ReadMarketDepthLevelTwo(code, version string) {
+	var r MarketDepthLevelTwo
 
-	d.Rid, _ = m.ReadInt()
-	d.Position, _ = m.ReadInt()
-	d.MarketMaker, _ = m.ReadString()
-	d.Operation, _ = m.ReadInt()
-	d.Side, _ = m.ReadInt()
-	d.Price, _ = m.ReadFloat()
-	d.Size, _ = m.ReadInt()
+	r.Rid, _ = b.ReadInt()
+	r.Position, _ = b.ReadInt()
+	r.MarketMaker, _ = b.ReadString()
+	r.Operation, _ = b.ReadInt()
+	r.Side, _ = b.ReadInt()
+	r.Price, _ = b.ReadFloat()
+	r.Size, _ = b.ReadInt()
 
-	m.MarketDepthLevelTwoChan <- d
+	b.MarketDepthLevelTwoChan <- r
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // SERIALIZERS
 ////////////////////////////////////////////////////////////////////////////////
 
-func (m *MarketDepthBroker) SideToString(s int64) string {
+func (b *MarketDepthBroker) SideToString(s int64) string {
 	switch s {
 	case 0:
 		return "ASK"
@@ -166,7 +164,7 @@ func (m *MarketDepthBroker) SideToString(s int64) string {
 	}
 }
 
-func (m *MarketDepthBroker) OperationToString(o int64) string {
+func (b *MarketDepthBroker) OperationToString(o int64) string {
 	switch o {
 	case 0:
 		return "INSERT"
@@ -179,8 +177,8 @@ func (m *MarketDepthBroker) OperationToString(o int64) string {
 	}
 }
 
-func (m *MarketDepthBroker) DepthToJSON(d *MarketDepth) ([]byte, error) {
-	c := m.Contracts[d.Rid]
+func (b *MarketDepthBroker) DepthToJSON(d *MarketDepth) ([]byte, error) {
+	c := b.Contracts[d.Rid]
 	return json.Marshal(struct {
 		Time         string
 		Symbol       string
@@ -205,15 +203,15 @@ func (m *MarketDepthBroker) DepthToJSON(d *MarketDepth) ([]byte, error) {
 		Strike:       c.Strike,
 		Expiry:       c.Expiry,
 		Position:     d.Position,
-		Operation:    m.OperationToString(d.Operation),
-		Side:         m.SideToString(d.Side),
+		Operation:    b.OperationToString(d.Operation),
+		Side:         b.SideToString(d.Side),
 		Price:        d.Price,
 		Size:         d.Size,
 	})
 }
 
-func (m *MarketDepthBroker) DepthToCSV(d *MarketDepth) string {
-	c := m.Contracts[d.Rid]
+func (b *MarketDepthBroker) DepthToCSV(d *MarketDepth) string {
+	c := b.Contracts[d.Rid]
 	return fmt.Sprintf(
 		"%s,%s,%s,%s,%s,%s,%.2f,%s,,%d,%s,%s,%.2f,%d",
 		strconv.FormatInt(time.Now().UTC().Add(-5*time.Hour).UnixNano(), 10),
@@ -225,8 +223,8 @@ func (m *MarketDepthBroker) DepthToCSV(d *MarketDepth) string {
 		c.Strike,
 		c.Expiry,
 		d.Position,
-		m.OperationToString(d.Operation),
-		m.SideToString(d.Side),
+		b.OperationToString(d.Operation),
+		b.SideToString(d.Side),
 		d.Price,
 		d.Size,
 	)
