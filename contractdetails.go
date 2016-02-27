@@ -8,12 +8,47 @@ import (
 	"time"
 )
 
-type TagValue struct {
-	Tag   string
-	Value string
+////////////////////////////////////////////////////////////////////////////////
+// REQUESTS
+////////////////////////////////////////////////////////////////////////////////
+
+type ContractDetailsRequest struct {
+  Con Contract
 }
 
-type ContractDetailsData struct {
+func init(){
+  REQUEST_CODE["ContractDetails"] = 9
+  REQUEST_VERSION["ContractDeetails"] = 7
+}
+
+func (r *ContractDetailsRequest) Send(id int64, b *ContractDetailsBroker){
+	b.Contracts[id] = r.Con
+	b.WriteInt(REQUEST_CODE["ContractDetails"])
+	b.WriteInt(REQUEST_VERSION["ContractDetails"])
+	b.WriteInt(id)
+	b.WriteInt(r.Con.ContractId)
+	b.WriteString(r.Con.Symbol)
+	b.WriteString(r.Con.SecurityType)
+	b.WriteString(r.Con.Expiry)
+	b.WriteFloat(r.Con.Strike)
+	b.WriteString(r.Con.Right)
+	b.WriteString(r.Con.Multiplier)
+	b.WriteString(r.Con.Exchange)
+	b.WriteString(r.Con.Currency)
+	b.WriteString(r.Con.LocalSymbol)
+	b.WriteString(r.Con.TradingClass)
+	b.WriteBool(r.Con.IncludeExpired)
+	b.WriteString(r.Con.SecIdType)
+	b.WriteString(r.Con.SecId)
+
+	b.Broker.SendRequest()
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// RESPONSES
+////////////////////////////////////////////////////////////////////////////////
+
+type ContractDetails struct {
 	Rid                  int64
 	Symbol               string
 	SecurityType         string
@@ -47,7 +82,106 @@ type ContractDetailsData struct {
 	SecIdList            []TagValue
 }
 
-func (d *ContractDetailsBroker) DetailsToJSON(t *ContractDetailsData) ([]byte, error) {
+type TagValue struct {
+	Tag   string
+	Value string
+}
+
+func init(){
+  RESPONSE_CODE["ContractDetails"]="10"
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// BROKER
+////////////////////////////////////////////////////////////////////////////////
+
+type ContractDetailsBroker struct {
+	Broker
+	Contracts map[int64]Contract
+	ContractDetailsChan  chan ContractDetails
+}
+
+func NewContractDetailsBroker() ContractDetailsBroker {
+	c := ContractDetailsBroker{
+		Broker{},
+		make(map[int64]Contract),
+		make(chan ContractDetails),
+	}
+	c.Broker.Initialize()
+	return c
+}
+
+func (b *ContractDetailsBroker) Listen() {
+	for {
+		s, err := b.ReadString()
+
+		if err != nil {
+			continue
+		}
+
+		if s == RESPONSE_CODE["ContractDetails"] {
+			version, err := b.ReadString()
+
+			if err != nil {
+				continue
+			}
+
+			b.ReadContractDetails(version)
+		}
+	}
+}
+
+func (b *ContractDetailsBroker) ReadContractDetails(version string) {
+	var c ContractDetails
+
+	c.Rid, _ = b.ReadInt()
+	c.Symbol, _ = b.ReadString()
+	c.SecurityType, _ = b.ReadString()
+	c.Expiry, _ = b.ReadString()
+	c.Strike, _ = b.ReadFloat()
+	c.Right, _ = b.ReadString()
+	c.Exchange, _ = b.ReadString()
+	c.Currency, _ = b.ReadString()
+	c.LocalSymbol, _ = b.ReadString()
+	c.MarketName, _ = b.ReadString()
+	c.TradingClass, _ = b.ReadString()
+	c.ContractId, _ = b.ReadInt()
+	c.MinTick, _ = b.ReadInt()
+	c.Multiplier, _ = b.ReadInt()
+	c.OrderTypes, _ = b.ReadString()
+	c.ValidExchanges, _ = b.ReadString()
+	c.PriceMagnifier, _ = b.ReadInt()
+	c.UnderlyingContractId, _ = b.ReadInt()
+	c.LongName, _ = b.ReadString()
+	c.PrimaryExchange, _ = b.ReadString()
+	c.ContractMonth, _ = b.ReadString()
+	c.Industry, _ = b.ReadString()
+	c.Category, _ = b.ReadString()
+	c.SubCategory, _ = b.ReadString()
+	c.TimeZoneId, _ = b.ReadString()
+	c.TradingHours, _ = b.ReadString()
+	c.LiquidHours, _ = b.ReadString()
+	c.EconValueRule, _ = b.ReadString()
+	c.EconValueMultiplier, _ = b.ReadFloat()
+	c.SecIdListCount, _ = b.ReadInt()
+
+	for i := 0; i < int(c.SecIdListCount); i++ {
+		var t, v string
+
+		t, _ = b.ReadString()
+		v, _ = b.ReadString()
+		tv := TagValue{t, v}
+		c.SecIdList = append(c.SecIdList, tv)
+	}
+
+	b.ContractDetailsChan <- c
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// SERIALIZERS
+////////////////////////////////////////////////////////////////////////////////
+
+func (b *ContractDetailsBroker) DetailsToJSON(d *ContractDetails) ([]byte, error) {
 	r, err := json.Marshal(struct {
 		Time                 string
 		Symbol               string
@@ -82,179 +216,74 @@ func (d *ContractDetailsBroker) DetailsToJSON(t *ContractDetailsData) ([]byte, e
 		//  	SecIdList            []TagValue
 	}{
 		Time:                 strconv.FormatInt(time.Now().UTC().Add(-5*time.Hour).UnixNano(), 10),
-		Symbol:               t.Symbol,
-		SecurityType:         t.SecurityType,
-		Expiry:               t.Expiry,
-		Strike:               t.Strike,
-		Right:                t.Right,
-		Exchange:             t.Exchange,
-		Currency:             t.Currency,
-		LocalSymbol:          t.LocalSymbol,
-		MarketName:           t.MarketName,
-		TradingClass:         t.TradingClass,
-		ContractId:           strconv.FormatInt(t.ContractId, 10),
-		MinTick:              t.MinTick,
-		Multiplier:           t.Multiplier,
-		OrderTypes:           t.OrderTypes,
-		ValidExchanges:       t.ValidExchanges,
-		PriceMagnifier:       t.PriceMagnifier,
-		UnderlyingContractId: t.UnderlyingContractId,
-		LongName:             t.LongName,
-		PrimaryExchange:      t.PrimaryExchange,
-		ContractMonth:        t.ContractMonth,
-		Industry:             t.Industry,
-		Category:             t.Category,
-		SubCategory:          t.SubCategory,
-		TimeZoneId:           t.TimeZoneId,
-		TradingHours:         t.TradingHours,
-		LiquidHours:          t.LiquidHours,
-		EconValueRule:        t.EconValueRule,
-		EconValueMultiplier:  t.EconValueMultiplier,
-		//  	SecIdListCount:       t.SecIdListCount,
-		//  	SecIdList:            t.SecIdList,
+		Symbol:               d.Symbol,
+		SecurityType:         d.SecurityType,
+		Expiry:               d.Expiry,
+		Strike:               d.Strike,
+		Right:                d.Right,
+		Exchange:             d.Exchange,
+		Currency:             d.Currency,
+		LocalSymbol:          d.LocalSymbol,
+		MarketName:           d.MarketName,
+		TradingClass:         d.TradingClass,
+		ContractId:           strconv.FormatInt(d.ContractId, 10),
+		MinTick:              d.MinTick,
+		Multiplier:           d.Multiplier,
+		OrderTypes:           d.OrderTypes,
+		ValidExchanges:       d.ValidExchanges,
+		PriceMagnifier:       d.PriceMagnifier,
+		UnderlyingContractId: d.UnderlyingContractId,
+		LongName:             d.LongName,
+		PrimaryExchange:      d.PrimaryExchange,
+		ContractMonth:        d.ContractMonth,
+		Industry:             d.Industry,
+		Category:             d.Category,
+		SubCategory:          d.SubCategory,
+		TimeZoneId:           d.TimeZoneId,
+		TradingHours:         d.TradingHours,
+		LiquidHours:          d.LiquidHours,
+		EconValueRule:        d.EconValueRule,
+		EconValueMultiplier:  d.EconValueMultiplier,
+		//  	SecIdListCount:       d.SecIdListCount,
+		//  	SecIdList:            d.SecIdList,
 	})
 
 	return bytes.Replace(r, []byte("\\u0026"), []byte("&"), -1), err
 }
 
-func (d *ContractDetailsBroker) DetailsToCSV(t *ContractDetailsData) string {
+func (b *ContractDetailsBroker) DetailsToCSV(d *ContractDetails) string {
 	return fmt.Sprintf(
 		"%s,%s,%s,%s,%.2f,%s,%s,%s,%s,%s,%s,%d,%d,%d,%s,%s,%d,%d,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%.2f",
 		strconv.FormatInt(time.Now().UTC().Add(-5*time.Hour).UnixNano(), 10),
-		t.Symbol,
-		t.SecurityType,
-		t.Expiry,
-		t.Strike,
-		t.Right,
-		t.Exchange,
-		t.Currency,
-		t.LocalSymbol,
-		t.MarketName,
-		t.TradingClass,
-		t.ContractId,
-		t.MinTick,
-		t.Multiplier,
-		t.OrderTypes,
-		t.ValidExchanges,
-		t.PriceMagnifier,
-		t.UnderlyingContractId,
-		t.LongName,
-		t.PrimaryExchange,
-		t.ContractMonth,
-		t.Industry,
-		t.Category,
-		t.SubCategory,
-		t.TimeZoneId,
-		t.TradingHours,
-		t.LiquidHours,
-		t.EconValueRule,
-		t.EconValueMultiplier,
-		//    t.SecIdListCount,
-		//    t.SecIdList,
+		d.Symbol,
+		d.SecurityType,
+		d.Expiry,
+		d.Strike,
+		d.Right,
+		d.Exchange,
+		d.Currency,
+		d.LocalSymbol,
+		d.MarketName,
+		d.TradingClass,
+		d.ContractId,
+		d.MinTick,
+		d.Multiplier,
+		d.OrderTypes,
+		d.ValidExchanges,
+		d.PriceMagnifier,
+		d.UnderlyingContractId,
+		d.LongName,
+		d.PrimaryExchange,
+		d.ContractMonth,
+		d.Industry,
+		d.Category,
+		d.SubCategory,
+		d.TimeZoneId,
+		d.TradingHours,
+		d.LiquidHours,
+		d.EconValueRule,
+		d.EconValueMultiplier,
+		//    d.SecIdListCount,
+		//    d.SecIdList,
 	)
-}
-
-type ContractDetailsBroker struct {
-	Broker
-	Contracts map[int64]Contract
-	DataChan  chan ContractDetailsData
-}
-
-func NewContractDetailsBroker() ContractDetailsBroker {
-	c := ContractDetailsBroker{
-		Broker{},
-		make(map[int64]Contract),
-		make(chan ContractDetailsData),
-	}
-	c.Broker.Initialize()
-	return c
-}
-
-func (d *ContractDetailsBroker) SendRequest(rid int64, c Contract) {
-	d.Contracts[rid] = c
-	d.WriteInt(REQUEST.CODE.CONTRACT_DATA)
-	d.WriteInt(REQUEST.VERSION.CONTRACT_DATA)
-	d.WriteInt(rid)
-	d.WriteInt(c.ContractId)
-	d.WriteString(c.Symbol)
-	d.WriteString(c.SecurityType)
-	d.WriteString(c.Expiry)
-	d.WriteFloat(c.Strike)
-	d.WriteString(c.Right)
-	d.WriteString(c.Multiplier)
-	d.WriteString(c.Exchange)
-	d.WriteString(c.Currency)
-	d.WriteString(c.LocalSymbol)
-	d.WriteString(c.TradingClass)
-	d.WriteBool(c.IncludeExpired)
-	d.WriteString(c.SecIdType)
-	d.WriteString(c.SecId)
-
-	d.Broker.SendRequest()
-}
-
-func (d *ContractDetailsBroker) Listen() {
-	for {
-		b, err := d.ReadString()
-
-		if err != nil {
-			continue
-		}
-
-		if b == RESPONSE.CODE.CONTRACT_DATA {
-			version, err := d.ReadString()
-
-			if err != nil {
-				continue
-			}
-
-			d.ReadContractDetailsData(version)
-		}
-	}
-}
-
-func (d *ContractDetailsBroker) ReadContractDetailsData(version string) {
-	var c ContractDetailsData
-
-	c.Rid, _ = d.ReadInt()
-	c.Symbol, _ = d.ReadString()
-	c.SecurityType, _ = d.ReadString()
-	c.Expiry, _ = d.ReadString()
-	c.Strike, _ = d.ReadFloat()
-	c.Right, _ = d.ReadString()
-	c.Exchange, _ = d.ReadString()
-	c.Currency, _ = d.ReadString()
-	c.LocalSymbol, _ = d.ReadString()
-	c.MarketName, _ = d.ReadString()
-	c.TradingClass, _ = d.ReadString()
-	c.ContractId, _ = d.ReadInt()
-	c.MinTick, _ = d.ReadInt()
-	c.Multiplier, _ = d.ReadInt()
-	c.OrderTypes, _ = d.ReadString()
-	c.ValidExchanges, _ = d.ReadString()
-	c.PriceMagnifier, _ = d.ReadInt()
-	c.UnderlyingContractId, _ = d.ReadInt()
-	c.LongName, _ = d.ReadString()
-	c.PrimaryExchange, _ = d.ReadString()
-	c.ContractMonth, _ = d.ReadString()
-	c.Industry, _ = d.ReadString()
-	c.Category, _ = d.ReadString()
-	c.SubCategory, _ = d.ReadString()
-	c.TimeZoneId, _ = d.ReadString()
-	c.TradingHours, _ = d.ReadString()
-	c.LiquidHours, _ = d.ReadString()
-	c.EconValueRule, _ = d.ReadString()
-	c.EconValueMultiplier, _ = d.ReadFloat()
-	c.SecIdListCount, _ = d.ReadInt()
-
-	for i := 0; i < int(c.SecIdListCount); i++ {
-		var t, v string
-
-		t, _ = d.ReadString()
-		v, _ = d.ReadString()
-		tv := TagValue{t, v}
-		c.SecIdList = append(c.SecIdList, tv)
-	}
-
-	d.DataChan <- c
-}
+} 
