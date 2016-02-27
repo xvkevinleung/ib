@@ -109,7 +109,7 @@ type AccountBroker struct {
 }
 
 func NewAccountBroker() AccountBroker {
-	a := AccountBroker{
+	b := AccountBroker{
 		Broker{},
 		make(chan AccountValue),
 		make(chan Portfolio),
@@ -117,91 +117,91 @@ func NewAccountBroker() AccountBroker {
 		make(chan AccountSummary),
 	}
 
-	return a
+	return b
 }
 
-func (a *AccountBroker) Listen() {
+func (b *AccountBroker) Listen() {
 	for {
-		b, err := a.ReadString()
+		s, err := b.ReadString()
 
 		if err != nil {
 			continue
 		}
 
-		if b != RESPONSE.CODE.ERR_MSG {
-			version, err := a.ReadString()
+		if s != RESPONSE.CODE.ERR_MSG {
+			version, err := b.ReadString()
 
 			if err != nil {
 				continue
 			}
 
-			switch b {
+			switch s {
 			case RESPONSE_CODE["AccountValue"]:
-				a.ReadAccountValue(b, version)
+				b.ReadAccountValue(s, version)
 			case RESPONSE_CODE["Portfolio"]:
-				a.ReadPortfolio(b, version)
+				b.ReadPortfolio(s, version)
 			case RESPONSE_CODE["AccountUpdateTime"]:
-				a.ReadAccountUpdateTime(b, version)
+				b.ReadAccountUpdateTime(s, version)
 			case RESPONSE_CODE["AccountSummary"]:
-				a.ReadAccountSummary(b, version)
+				b.ReadAccountSummary(s, version)
 			}
 		}
 	}
 }
 
-func (a *AccountBroker) ReadAccountValue(code, version string) {
-	var d AccountValue
+func (b *AccountBroker) ReadAccountValue(code, version string) {
+	var r AccountValue
 
-	d.Key, _ = a.ReadString()
-	d.Value, _ = a.ReadString()
-	d.Currency, _ = a.ReadString()
-	d.Account, _ = a.ReadString()
+	r.Key, _ = b.ReadString()
+	r.Value, _ = b.ReadString()
+	r.Currency, _ = b.ReadString()
+	r.Account, _ = b.ReadString()
 
-	a.AccountValueChan <- d
+	b.AccountValueChan <- r
 }
 
-func (a *AccountBroker) ReadPortfolio(code, version string) {
-	var d Portfolio
+func (b *AccountBroker) ReadPortfolio(code, version string) {
+	var r Portfolio
 
-	d.Contract.ContractId, _ = a.ReadInt()
-	d.Contract.Symbol, _ = a.ReadString()
-	d.Contract.SecurityType, _ = a.ReadString()
-	d.Contract.Expiry, _ = a.ReadString()
-	d.Contract.Strike, _ = a.ReadFloat()
-	d.Contract.Right, _ = a.ReadString()
-	d.Contract.Multiplier, _ = a.ReadString()
-	d.Contract.PrimaryExchange, _ = a.ReadString()
-	d.Contract.Currency, _ = a.ReadString()
-	d.Contract.LocalSymbol, _ = a.ReadString()
-	d.Contract.TradingClass, _ = a.ReadString()
-	d.Position, _ = a.ReadInt()
-	d.MarketPrice, _ = a.ReadFloat()
-	d.MarketValue, _ = a.ReadFloat()
-	d.AverageCost, _ = a.ReadFloat()
-	d.UnrealizedPNL, _ = a.ReadFloat()
-	d.AccountName, _ = a.ReadString()
+	r.Contract.ContractId, _ = b.ReadInt()
+	r.Contract.Symbol, _ = b.ReadString()
+	r.Contract.SecurityType, _ = b.ReadString()
+	r.Contract.Expiry, _ = b.ReadString()
+	r.Contract.Strike, _ = b.ReadFloat()
+	r.Contract.Right, _ = b.ReadString()
+	r.Contract.Multiplier, _ = b.ReadString()
+	r.Contract.PrimaryExchange, _ = b.ReadString()
+	r.Contract.Currency, _ = b.ReadString()
+	r.Contract.LocalSymbol, _ = b.ReadString()
+	r.Contract.TradingClass, _ = b.ReadString()
+	r.Position, _ = b.ReadInt()
+	r.MarketPrice, _ = b.ReadFloat()
+	r.MarketValue, _ = b.ReadFloat()
+	r.AverageCost, _ = b.ReadFloat()
+	r.UnrealizedPNL, _ = b.ReadFloat()
+	r.AccountName, _ = b.ReadString()
 
-	a.PortfolioChan <- d
+	b.PortfolioChan <- r
 }
 
-func (a *AccountBroker) ReadAccountUpdateTime(code, version string) {
-	var d AccountTime
+func (b *AccountBroker) ReadAccountUpdateTime(code, version string) {
+	var r AccountTime
 
-	d.Time, _ = a.ReadString()
+	r.Time, _ = b.ReadString()
 
-	a.AccountTimeChan <- d
+	b.AccountTimeChan <- r
 }
 
-func (a *AccountBroker) ReadAccountSummary(code, version string) {
-	var d AccountSummary
+func (b *AccountBroker) ReadAccountSummary(code, version string) {
+	var r AccountSummary
 
-	d.Rid, _ = a.ReadInt()
-	d.Account, _ = a.ReadString()
-	d.Tag, _ = a.ReadString()
-	d.Value, _ = a.ReadString()
-	d.Currency, _ = a.ReadString()
+	r.Rid, _ = b.ReadInt()
+	r.Account, _ = b.ReadString()
+	r.Tag, _ = b.ReadString()
+	r.Value, _ = b.ReadString()
+	r.Currency, _ = b.ReadString()
 
-	a.AccountSummaryChan <- d
+	b.AccountSummaryChan <- r
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -10,21 +10,21 @@ import (
 ////////////////////////////////////////////////////////////////////////////////
 
 type HistoricalDataRequest struct {
-	Contract   Contract
-	End   string
-	Bar   string
-	Dur   string
-	Rth   bool
-	Show  string
-	Datef int64
+	Contract Contract
+	End      string
+	Bar      string
+	Dur      string
+	Rth      bool
+	Show     string
+	Datef    int64
 }
 
-func init(){
-  REQUEST_CODE["HistoricalData"]=20
-  REQUEST_VERSION["HistoricalData"]=5
+func init() {
+	REQUEST_CODE["HistoricalData"] = 20
+	REQUEST_VERSION["HistoricalData"] = 5
 }
 
-func (r *HistoricalDataRequest) Send(id int64, b *HistoricalDataBroker){
+func (r *HistoricalDataRequest) Send(id int64, b *HistoricalDataBroker) {
 	b.Contract = r.Contract
 	b.WriteInt(REQUEST_CODE["HistoricalData"])
 	b.WriteInt(REQUEST_VERSION["HistoricalData"])
@@ -76,8 +76,8 @@ type HistoricalDataItem struct {
 	BarCount int64
 }
 
-func init(){
-  RESPONSE_CODE["HistoricalData"]="17"
+func init() {
+	RESPONSE_CODE["HistoricalData"] = "17"
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -203,5 +203,3 @@ func (b *HistoricalDataBroker) HistoricalDataItemToCSV(d *HistoricalDataItem) st
 		d.BarCount,
 	)
 }
-
-

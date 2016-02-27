@@ -102,13 +102,13 @@ type ContractDetailsBroker struct {
 }
 
 func NewContractDetailsBroker() ContractDetailsBroker {
-	c := ContractDetailsBroker{
+	b := ContractDetailsBroker{
 		Broker{},
 		make(map[int64]Contract),
 		make(chan ContractDetails),
 	}
-	c.Broker.Initialize()
-	return c
+	b.Broker.Initialize()
+	return b
 }
 
 func (b *ContractDetailsBroker) Listen() {
