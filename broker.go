@@ -15,7 +15,7 @@ import (
 type Broker struct {
 	ClientId  int64
 	Conn      net.Conn
-	ReqId     int64
+	Rid     int64
 	OutStream *bytes.Buffer
 	InStream  *bufio.Reader
 }
@@ -28,9 +28,9 @@ func NextClientId() int64 {
 	return CLIENT_ID_INCR
 }
 
-func (b *Broker) NextReqId() int64 {
-	b.ReqId += 1
-	return b.ReqId
+func (b *Broker) NextRid() int64 {
+	b.Rid += 1
+	return b.Rid
 }
 
 func (b *Broker) Initialize() {
