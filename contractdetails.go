@@ -13,15 +13,15 @@ import (
 ////////////////////////////////////////////////////////////////////////////////
 
 type ContractDetailsRequest struct {
-  Con Contract
+	Con Contract
 }
 
-func init(){
-  REQUEST_CODE["ContractDetails"] = 9
-  REQUEST_VERSION["ContractDeetails"] = 7
+func init() {
+	REQUEST_CODE["ContractDetails"] = 9
+	REQUEST_VERSION["ContractDeetails"] = 7
 }
 
-func (r *ContractDetailsRequest) Send(id int64, b *ContractDetailsBroker){
+func (r *ContractDetailsRequest) Send(id int64, b *ContractDetailsBroker) {
 	b.Contracts[id] = r.Con
 	b.WriteInt(REQUEST_CODE["ContractDetails"])
 	b.WriteInt(REQUEST_VERSION["ContractDetails"])
@@ -87,8 +87,8 @@ type TagValue struct {
 	Value string
 }
 
-func init(){
-  RESPONSE_CODE["ContractDetails"]="10"
+func init() {
+	RESPONSE_CODE["ContractDetails"] = "10"
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -97,8 +97,8 @@ func init(){
 
 type ContractDetailsBroker struct {
 	Broker
-	Contracts map[int64]Contract
-	ContractDetailsChan  chan ContractDetails
+	Contracts           map[int64]Contract
+	ContractDetailsChan chan ContractDetails
 }
 
 func NewContractDetailsBroker() ContractDetailsBroker {
@@ -181,7 +181,7 @@ func (b *ContractDetailsBroker) ReadContractDetails(version string) {
 // SERIALIZERS
 ////////////////////////////////////////////////////////////////////////////////
 
-func (b *ContractDetailsBroker) DetailsToJSON(d *ContractDetails) ([]byte, error) {
+func (b *ContractDetailsBroker) ContractDetailsToJSON(d *ContractDetails) ([]byte, error) {
 	r, err := json.Marshal(struct {
 		Time                 string
 		Symbol               string
@@ -251,7 +251,7 @@ func (b *ContractDetailsBroker) DetailsToJSON(d *ContractDetails) ([]byte, error
 	return bytes.Replace(r, []byte("\\u0026"), []byte("&"), -1), err
 }
 
-func (b *ContractDetailsBroker) DetailsToCSV(d *ContractDetails) string {
+func (b *ContractDetailsBroker) ContractDetailsToCSV(d *ContractDetails) string {
 	return fmt.Sprintf(
 		"%s,%s,%s,%s,%.2f,%s,%s,%s,%s,%s,%s,%d,%d,%d,%s,%s,%d,%d,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%.2f",
 		strconv.FormatInt(time.Now().UTC().Add(-5*time.Hour).UnixNano(), 10),
@@ -286,4 +286,4 @@ func (b *ContractDetailsBroker) DetailsToCSV(d *ContractDetails) string {
 		//    d.SecIdListCount,
 		//    d.SecIdList,
 	)
-} 
+}
