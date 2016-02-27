@@ -29,6 +29,10 @@ type ResponseCodes struct {
 	NEXT_VALID_ID            string
 	DELTA_NEUTRAL_VALIDATION string
 	REALTIMEBARS             string
+	ACCOUNT_SUMMARY          string
+	ACCOUNT_SUMMARY_END      string
+	POSITION                 string
+	POSITION_END             string
 }
 
 func init() {
@@ -54,4 +58,8 @@ func init() {
 	RESPONSE.CODE.NEXT_VALID_ID = "9"
 	RESPONSE.CODE.DELTA_NEUTRAL_VALIDATION = "56"
 	RESPONSE.CODE.REALTIMEBARS = "50"
+	RESPONSE.CODE.ACCOUNT_SUMMARY = "63"
+	RESPONSE.CODE.ACCOUNT_SUMMARY_END = "64"
+	RESPONSE.CODE.POSITION = "61"
+	RESPONSE.CODE.POSITION_END = "62"
 }
