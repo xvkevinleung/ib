@@ -13,7 +13,7 @@ import (
 ////////////////////////////////////////////////////////////////////////////////
 
 type ContractDetailsRequest struct {
-	Con Contract
+	Contract Contract
 }
 
 func init() {
@@ -22,24 +22,24 @@ func init() {
 }
 
 func (r *ContractDetailsRequest) Send(id int64, b *ContractDetailsBroker) {
-	b.Contracts[id] = r.Con
+	b.Contracts[id] = r.Contract
 	b.WriteInt(REQUEST_CODE["ContractDetails"])
 	b.WriteInt(REQUEST_VERSION["ContractDetails"])
 	b.WriteInt(id)
-	b.WriteInt(r.Con.ContractId)
-	b.WriteString(r.Con.Symbol)
-	b.WriteString(r.Con.SecurityType)
-	b.WriteString(r.Con.Expiry)
-	b.WriteFloat(r.Con.Strike)
-	b.WriteString(r.Con.Right)
-	b.WriteString(r.Con.Multiplier)
-	b.WriteString(r.Con.Exchange)
-	b.WriteString(r.Con.Currency)
-	b.WriteString(r.Con.LocalSymbol)
-	b.WriteString(r.Con.TradingClass)
-	b.WriteBool(r.Con.IncludeExpired)
-	b.WriteString(r.Con.SecIdType)
-	b.WriteString(r.Con.SecId)
+	b.WriteInt(r.Contract.ContractId)
+	b.WriteString(r.Contract.Symbol)
+	b.WriteString(r.Contract.SecurityType)
+	b.WriteString(r.Contract.Expiry)
+	b.WriteFloat(r.Contract.Strike)
+	b.WriteString(r.Contract.Right)
+	b.WriteString(r.Contract.Multiplier)
+	b.WriteString(r.Contract.Exchange)
+	b.WriteString(r.Contract.Currency)
+	b.WriteString(r.Contract.LocalSymbol)
+	b.WriteString(r.Contract.TradingClass)
+	b.WriteBool(r.Contract.IncludeExpired)
+	b.WriteString(r.Contract.SecIdType)
+	b.WriteString(r.Contract.SecId)
 
 	b.Broker.SendRequest()
 }

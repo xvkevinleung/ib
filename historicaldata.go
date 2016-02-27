@@ -1,26 +1,67 @@
 package ib
 
-// NOTE: interactive brokers historical data is on central time
-
 import (
 	"encoding/json"
 	"fmt"
 )
 
-type HistoricalDataBroker struct {
-	Broker
-	Contract           Contract
-	HistoricalDataChan chan HistoricalData
-}
+////////////////////////////////////////////////////////////////////////////////
+// REQUESTS
+////////////////////////////////////////////////////////////////////////////////
 
 type HistoricalDataRequest struct {
-	Con   Contract
+	Contract   Contract
 	End   string
 	Bar   string
 	Dur   string
 	Rth   bool
 	Show  string
 	Datef int64
+}
+
+func init(){
+  REQUEST_CODE["HistoricalData"]=20
+  REQUEST_VERSION["HistoricalData"]=5
+}
+
+func (r *HistoricalDataRequest) Send(id int64, b *HistoricalDataBroker){
+	b.Contract = r.Contract
+	b.WriteInt(REQUEST_CODE["HistoricalData"])
+	b.WriteInt(REQUEST_VERSION["HistoricalData"])
+	b.WriteInt(id)
+	b.WriteInt(r.Contract.ContractId)
+	b.WriteString(r.Contract.Symbol)
+	b.WriteString(r.Contract.SecurityType)
+	b.WriteString(r.Contract.Expiry)
+	b.WriteFloat(r.Contract.Strike)
+	b.WriteString(r.Contract.Right)
+	b.WriteString(r.Contract.Multiplier)
+	b.WriteString(r.Contract.Exchange)
+	b.WriteString(r.Contract.PrimaryExchange)
+	b.WriteString(r.Contract.Currency)
+	b.WriteString(r.Contract.LocalSymbol)
+	b.WriteString(r.Contract.TradingClass)
+	b.WriteInt(0) // include expired
+	b.WriteString(r.End)
+	b.WriteString(r.Bar)
+	b.WriteString(r.Dur)
+	b.WriteBool(r.Rth)
+	b.WriteString(r.Show)
+	b.WriteInt(r.Datef)
+
+	b.Broker.SendRequest()
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// RESPONSES
+////////////////////////////////////////////////////////////////////////////////
+
+type HistoricalData struct {
+	Rid   string
+	Start string
+	End   string
+	Count int64
+	Data  []HistoricalDataItem
 }
 
 type HistoricalDataItem struct {
@@ -35,7 +76,75 @@ type HistoricalDataItem struct {
 	BarCount int64
 }
 
-func (b *HistoricalDataBroker) DataItemToJSON(h *HistoricalDataItem) ([]byte, error) {
+func init(){
+  RESPONSE_CODE["HistoricalData"]="17"
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// BROKER
+////////////////////////////////////////////////////////////////////////////////
+
+type HistoricalDataBroker struct {
+	Broker
+	Contract           Contract
+	HistoricalDataChan chan HistoricalData
+}
+
+func NewHistoricalDataBroker() HistoricalDataBroker {
+	b := HistoricalDataBroker{Broker{}, Contract{}, make(chan HistoricalData)}
+	return b
+}
+
+func (b *HistoricalDataBroker) Listen() {
+	for {
+		s, err := b.ReadString()
+
+		if err != nil {
+			continue
+		}
+
+		if s == RESPONSE_CODE["HistoricalData"] {
+			version, err := b.ReadString()
+
+			if err != nil {
+				continue
+			}
+
+			b.ReadHistoricalData(version)
+		}
+	}
+}
+
+func (b *HistoricalDataBroker) ReadHistoricalData(version string) {
+	var r HistoricalData
+
+	r.Rid, _ = b.ReadString()
+	r.Start, _ = b.ReadString()
+	r.End, _ = b.ReadString()
+	r.Count, _ = b.ReadInt()
+
+	r.Data = make([]HistoricalDataItem, r.Count)
+
+	for i := range r.Data {
+		r.Data[i].Date, _ = b.ReadString()
+		r.Data[i].Open, _ = b.ReadFloat()
+		r.Data[i].High, _ = b.ReadFloat()
+		r.Data[i].Low, _ = b.ReadFloat()
+		r.Data[i].Close, _ = b.ReadFloat()
+		r.Data[i].Volume, _ = b.ReadInt()
+		r.Data[i].WAP, _ = b.ReadFloat()
+		r.Data[i].HasGaps, _ = b.ReadBool()
+		r.Data[i].BarCount, _ = b.ReadInt()
+	}
+
+	b.HistoricalDataChan <- r
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// SERIALIZERS
+////////////////////////////////////////////////////////////////////////////////
+
+func (b *HistoricalDataBroker) HistoricalDataItemToJSON(d *HistoricalDataItem) ([]byte, error) {
 	return json.Marshal(struct {
 		Date         string
 		Symbol       string
@@ -54,7 +163,7 @@ func (b *HistoricalDataBroker) DataItemToJSON(h *HistoricalDataItem) ([]byte, er
 		HasGaps      bool
 		BarCount     int64
 	}{
-		Date:         h.Date,
+		Date:         d.Date,
 		Symbol:       b.Contract.Symbol,
 		Exchange:     b.Contract.Exchange,
 		SecurityType: b.Contract.SecurityType,
@@ -62,21 +171,21 @@ func (b *HistoricalDataBroker) DataItemToJSON(h *HistoricalDataItem) ([]byte, er
 		Right:        b.Contract.Right,
 		Strike:       b.Contract.Strike,
 		Expiry:       b.Contract.Expiry,
-		Open:         h.Open,
-		High:         h.High,
-		Low:          h.Low,
-		Close:        h.Close,
-		Volume:       h.Volume,
-		WAP:          h.WAP,
-		HasGaps:      h.HasGaps,
-		BarCount:     h.BarCount,
+		Open:         d.Open,
+		High:         d.High,
+		Low:          d.Low,
+		Close:        d.Close,
+		Volume:       d.Volume,
+		WAP:          d.WAP,
+		HasGaps:      d.HasGaps,
+		BarCount:     d.BarCount,
 	})
 }
 
-func (b *HistoricalDataBroker) DataItemToCSV(h *HistoricalDataItem) string {
+func (b *HistoricalDataBroker) HistoricalDataItemToCSV(d *HistoricalDataItem) string {
 	return fmt.Sprintf(
 		"%v,%s,%s,%s,%s,%s,%.2f,%s,%.2f,%.2f,%.2f,%.2f,%d,%.2f,%t,%d",
-		h.Date,
+		d.Date,
 		b.Contract.Symbol,
 		b.Contract.Exchange,
 		b.Contract.SecurityType,
@@ -84,99 +193,15 @@ func (b *HistoricalDataBroker) DataItemToCSV(h *HistoricalDataItem) string {
 		b.Contract.Right,
 		b.Contract.Strike,
 		b.Contract.Expiry,
-		h.Open,
-		h.High,
-		h.Low,
-		h.Close,
-		h.Volume,
-		h.WAP,
-		h.HasGaps,
-		h.BarCount,
+		d.Open,
+		d.High,
+		d.Low,
+		d.Close,
+		d.Volume,
+		d.WAP,
+		d.HasGaps,
+		d.BarCount,
 	)
 }
 
-type HistoricalData struct {
-	Rid   string
-	Start string
-	End   string
-	Count int64
-	Data  []HistoricalDataItem
-}
 
-func NewHistoricalDataBroker() HistoricalDataBroker {
-	h := HistoricalDataBroker{Broker{}, Contract{}, make(chan HistoricalData)}
-	return h
-}
-
-func (h *HistoricalDataBroker) SendRequest(rid int64, d HistoricalDataRequest) {
-	h.Contract = d.Con
-	h.WriteInt(REQUEST.CODE.HISTORICAL_DATA)
-	h.WriteInt(REQUEST.VERSION.HISTORICAL_DATA)
-	h.WriteInt(rid)
-	h.WriteInt(d.Con.ContractId)
-	h.WriteString(d.Con.Symbol)
-	h.WriteString(d.Con.SecurityType)
-	h.WriteString(d.Con.Expiry)
-	h.WriteFloat(d.Con.Strike)
-	h.WriteString(d.Con.Right)
-	h.WriteString(d.Con.Multiplier)
-	h.WriteString(d.Con.Exchange)
-	h.WriteString(d.Con.PrimaryExchange)
-	h.WriteString(d.Con.Currency)
-	h.WriteString(d.Con.LocalSymbol)
-	h.WriteString(d.Con.TradingClass)
-	h.WriteInt(0) // include expired
-	h.WriteString(d.End)
-	h.WriteString(d.Bar)
-	h.WriteString(d.Dur)
-	h.WriteBool(d.Rth)
-	h.WriteString(d.Show)
-	h.WriteInt(d.Datef)
-
-	h.Broker.SendRequest()
-}
-
-func (h *HistoricalDataBroker) Listen() {
-	for {
-		b, err := h.ReadString()
-
-		if err != nil {
-			continue
-		}
-
-		if b == RESPONSE.CODE.HISTORICAL_DATA {
-			version, err := h.ReadString()
-
-			if err != nil {
-				continue
-			}
-
-			h.ReadHistoricalData(version)
-		}
-	}
-}
-
-func (h *HistoricalDataBroker) ReadHistoricalData(version string) {
-	var d HistoricalData
-
-	d.Rid, _ = h.ReadString()
-	d.Start, _ = h.ReadString()
-	d.End, _ = h.ReadString()
-	d.Count, _ = h.ReadInt()
-
-	d.Data = make([]HistoricalDataItem, d.Count)
-
-	for i := range d.Data {
-		d.Data[i].Date, _ = h.ReadString()
-		d.Data[i].Open, _ = h.ReadFloat()
-		d.Data[i].High, _ = h.ReadFloat()
-		d.Data[i].Low, _ = h.ReadFloat()
-		d.Data[i].Close, _ = h.ReadFloat()
-		d.Data[i].Volume, _ = h.ReadInt()
-		d.Data[i].WAP, _ = h.ReadFloat()
-		d.Data[i].HasGaps, _ = h.ReadBool()
-		d.Data[i].BarCount, _ = h.ReadInt()
-	}
-
-	h.HistoricalDataChan <- d
-}
