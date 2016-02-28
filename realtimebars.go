@@ -26,8 +26,8 @@ func init() {
 
 func (r *RealTimeBarsRequest) SendRequest(id int64, b *RealTimeBarsBroker) {
 	b.Contracts[id] = r.Contract
-	b.WriteInt(REQUEST.CODE.REALTIMEBARS)
-	b.WriteInt(REQUEST.VERSION.REALTIMEBARS)
+	b.WriteInt(REQUEST_CODE["RealTimeBars"])
+	b.WriteInt(REQUEST_VERSION["RealTimeBars"])
 	b.WriteInt(id)
 	b.WriteInt(r.Contract.ContractId)
 	b.WriteString(r.Contract.Symbol)

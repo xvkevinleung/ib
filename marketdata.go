@@ -24,8 +24,8 @@ func init() {
 
 func (r *MarketDataRequest) Send(id int64, b *MarketDataBroker) {
 	b.Contracts[id] = r.Contract
-	b.WriteInt(REQUEST.CODE.MARKET_DATA)
-	b.WriteInt(REQUEST.VERSION.MARKET_DATA)
+	b.WriteInt(REQUEST_CODE["MarketData"])
+	b.WriteInt(REQUEST_VERSION["MarketData"])
 	b.WriteInt(id)
 	b.WriteInt(r.Contract.ContractId)
 	b.WriteString(r.Contract.Symbol)

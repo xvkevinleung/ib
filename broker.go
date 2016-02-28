@@ -28,7 +28,7 @@ func NextClientId() int64 {
 	return CLIENT_ID_INCR
 }
 
-func (b *Broker) NextRid() int64 {
+func (b *Broker) NextReqId() int64 {
 	b.Rid += 1
 	return b.Rid
 }
