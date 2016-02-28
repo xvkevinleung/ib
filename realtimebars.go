@@ -96,7 +96,7 @@ func (b *RealTimeBarsBroker) Listen() {
 			continue
 		}
 
-		if s == RESPONSE.CODE.REALTIMEBARS {
+		if s == RESPONSE_CODE["RealTimeBar"] {
 			version, err := b.ReadString()
 
 			if err != nil {

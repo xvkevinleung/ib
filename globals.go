@@ -13,4 +13,6 @@ func init() {
 	REQUEST_CODE = make(map[string]int64)
 	REQUEST_VERSION = make(map[string]int64)
 	RESPONSE_CODE = make(map[string]string)
+
+	RESPONSE_CODE["ErrMsg"] = "4"
 }

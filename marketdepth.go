@@ -103,7 +103,7 @@ func (b *MarketDepthBroker) Listen() {
 			continue
 		}
 
-		if s != RESPONSE.CODE.ERR_MSG {
+		if s != RESPONSE_CODE["ErrMsg"] {
 			version, err := b.ReadString()
 
 			if err != nil {
