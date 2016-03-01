@@ -322,6 +322,7 @@ func (b *MarketDataBroker) TickTypeToString(t int64) string {
 func (b *MarketDataBroker) PriceToJSON(d *TickPrice) ([]byte, error) {
 	c := b.Contracts[d.Rid]
 	return json.Marshal(struct {
+		Rid          int64
 		Time         string
 		Symbol       string
 		SecurityType string
@@ -334,6 +335,7 @@ func (b *MarketDataBroker) PriceToJSON(d *TickPrice) ([]byte, error) {
 		Price        float64
 		Size         int64
 	}{
+		Rid:          d.Rid,
 		Time:         strconv.FormatInt(time.Now().UTC().Add(-5*time.Hour).UnixNano(), 10),
 		Symbol:       c.Symbol,
 		SecurityType: c.SecurityType,
@@ -351,7 +353,8 @@ func (b *MarketDataBroker) PriceToJSON(d *TickPrice) ([]byte, error) {
 func (b *MarketDataBroker) PriceToCSV(d *TickPrice) string {
 	c := b.Contracts[d.Rid]
 	return fmt.Sprintf(
-		"%s,%s,%s,%s,%s,%s,%.2f,%s,%s,%.2f,%d",
+		"%d,%s,%s,%s,%s,%s,%s,%.2f,%s,%s,%.2f,%d",
+		d.Rid,
 		strconv.FormatInt(time.Now().UTC().Add(-5*time.Hour).UnixNano(), 10),
 		c.Symbol,
 		c.SecurityType,

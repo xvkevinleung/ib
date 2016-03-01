@@ -183,6 +183,7 @@ func (b *ContractDetailsBroker) ReadContractDetails(version string) {
 
 func (b *ContractDetailsBroker) ContractDetailsToJSON(d *ContractDetails) ([]byte, error) {
 	r, err := json.Marshal(struct {
+		Rid                  int64
 		Time                 string
 		Symbol               string
 		SecurityType         string
@@ -215,6 +216,7 @@ func (b *ContractDetailsBroker) ContractDetailsToJSON(d *ContractDetails) ([]byt
 		//  	SecIdListCount       int64
 		//  	SecIdList            []TagValue
 	}{
+		Rid:                  d.Rid,
 		Time:                 strconv.FormatInt(time.Now().UTC().Add(-5*time.Hour).UnixNano(), 10),
 		Symbol:               d.Symbol,
 		SecurityType:         d.SecurityType,
@@ -253,7 +255,8 @@ func (b *ContractDetailsBroker) ContractDetailsToJSON(d *ContractDetails) ([]byt
 
 func (b *ContractDetailsBroker) ContractDetailsToCSV(d *ContractDetails) string {
 	return fmt.Sprintf(
-		"%s,%s,%s,%s,%.2f,%s,%s,%s,%s,%s,%s,%d,%d,%d,%s,%s,%d,%d,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%.2f",
+		"%d,%s,%s,%s,%s,%.2f,%s,%s,%s,%s,%s,%s,%d,%d,%d,%s,%s,%d,%d,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%.2f",
+		d.Rid,
 		strconv.FormatInt(time.Now().UTC().Add(-5*time.Hour).UnixNano(), 10),
 		d.Symbol,
 		d.SecurityType,

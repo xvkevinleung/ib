@@ -21,7 +21,7 @@ type Broker struct {
 }
 
 func NextClientId() int64 {
-	t := time.Now().Unix()
+	t := time.Now().UnixNano()
 	rand.Seed(t)
 	CLIENT_ID_INCR = int64(rand.Intn(9999))
 
@@ -38,10 +38,10 @@ func (b *Broker) Initialize() {
 	b.OutStream = bytes.NewBuffer(make([]byte, 0, 4096))
 }
 
-func (b *Broker) Connect() error {
+func (b *Broker) Connect(addr string, version int64) error {
 	b.Initialize()
 
-	conn, err := net.Dial("tcp", Conf.Host+":"+Conf.Port)
+	conn, err := net.Dial("tcp", addr)
 
 	if err != nil {
 		return err
@@ -51,13 +51,13 @@ func (b *Broker) Connect() error {
 
 	b.InStream = bufio.NewReader(b.Conn)
 
-	err = b.ServerShake()
+	err = b.ServerShake(version)
 
 	return err
 }
 
-func (b *Broker) ServerShake() error {
-	b.WriteInt(Conf.ClientVersion)
+func (b *Broker) ServerShake(version int64) error {
+	b.WriteInt(version)
 	b.WriteInt(b.ClientId)
 
 	_, err := b.SendRequest()

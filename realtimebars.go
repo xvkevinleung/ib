@@ -24,7 +24,7 @@ func init() {
 	REQUEST_VERSION["RealTimeBars"] = 2
 }
 
-func (r *RealTimeBarsRequest) SendRequest(id int64, b *RealTimeBarsBroker) {
+func (r *RealTimeBarsRequest) Send(id int64, b *RealTimeBarsBroker) {
 	b.Contracts[id] = r.Contract
 	b.WriteInt(REQUEST_CODE["RealTimeBars"])
 	b.WriteInt(REQUEST_VERSION["RealTimeBars"])
@@ -131,6 +131,7 @@ func (b *RealTimeBarsBroker) ReadRealTimeBar(version string) {
 func (b *RealTimeBarsBroker) RealTimeBarToJSON(d *RealTimeBar) ([]byte, error) {
 	c := b.Contracts[d.Rid]
 	return json.Marshal(struct {
+		Rid          int64
 		Time         string
 		Symbol       string
 		SecurityType string
@@ -148,6 +149,7 @@ func (b *RealTimeBarsBroker) RealTimeBarToJSON(d *RealTimeBar) ([]byte, error) {
 		WAP          float64
 		BarCount     int64
 	}{
+		Rid:          d.Rid,
 		Time:         strconv.FormatInt(time.Now().UTC().Add(-5*time.Hour).UnixNano(), 10),
 		Symbol:       c.Symbol,
 		SecurityType: c.SecurityType,
@@ -170,7 +172,8 @@ func (b *RealTimeBarsBroker) RealTimeBarToJSON(d *RealTimeBar) ([]byte, error) {
 func (b *RealTimeBarsBroker) RealTimeBarToCSV(d *RealTimeBar) string {
 	c := b.Contracts[d.Rid]
 	return fmt.Sprintf(
-		"%s,%s,%s,%s,%s,%s,%.2f,%s,%s,%.2f,%.2f,%.2f,%.2f,%d,%.2f,%d",
+		"%d,%s,%s,%s,%s,%s,%s,%.2f,%s,%s,%.2f,%.2f,%.2f,%.2f,%d,%.2f,%d",
+		d.Rid,
 		strconv.FormatInt(time.Now().UTC().Add(-5*time.Hour).UnixNano(), 10),
 		c.Symbol,
 		c.SecurityType,

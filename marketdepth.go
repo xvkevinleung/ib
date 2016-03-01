@@ -21,7 +21,7 @@ func init() {
 	REQUEST_VERSION["MarketDepth"] = 4
 }
 
-func (r *MarketDepthRequest) Send(id int64, b MarketDepthBroker) {
+func (r *MarketDepthRequest) Send(id int64, b *MarketDepthBroker) {
 	b.Contracts[id] = r.Contract
 	b.WriteInt(REQUEST_CODE["MarketDepth"])
 	b.WriteInt(REQUEST_VERSION["MarketDepth"])
@@ -180,6 +180,7 @@ func (b *MarketDepthBroker) OperationToString(o int64) string {
 func (b *MarketDepthBroker) DepthToJSON(d *MarketDepth) ([]byte, error) {
 	c := b.Contracts[d.Rid]
 	return json.Marshal(struct {
+		Rid          int64
 		Time         string
 		Symbol       string
 		SecurityType string
@@ -194,6 +195,7 @@ func (b *MarketDepthBroker) DepthToJSON(d *MarketDepth) ([]byte, error) {
 		Price        float64
 		Size         int64
 	}{
+		Rid:          d.Rid,
 		Time:         strconv.FormatInt(time.Now().UTC().Add(-5*time.Hour).UnixNano(), 10),
 		Symbol:       c.Symbol,
 		SecurityType: c.SecurityType,
@@ -213,7 +215,8 @@ func (b *MarketDepthBroker) DepthToJSON(d *MarketDepth) ([]byte, error) {
 func (b *MarketDepthBroker) DepthToCSV(d *MarketDepth) string {
 	c := b.Contracts[d.Rid]
 	return fmt.Sprintf(
-		"%s,%s,%s,%s,%s,%s,%.2f,%s,,%d,%s,%s,%.2f,%d",
+		"%d,%s,%s,%s,%s,%s,%s,%.2f,%s,,%d,%s,%s,%.2f,%d",
+		d.Rid,
 		strconv.FormatInt(time.Now().UTC().Add(-5*time.Hour).UnixNano(), 10),
 		c.Symbol,
 		c.SecurityType,
