@@ -1,22 +1,28 @@
 package ib
 
+import (
+	"encoding/json"
+	"strconv"
+	"time"
+)
+
 ////////////////////////////////////////////////////////////////////////////////
 // REQUESTS
 ////////////////////////////////////////////////////////////////////////////////
 
 type AccountUpdatesRequest struct {
-	Subscribe   bool
+	Subscribe   bool `json:",string"`
 	AccountCode string
 }
 
 func init() {
-	REQUEST_CODE["AccountUpdates"] = 63
-	REQUEST_VERSION["AccountUpdates"] = 1
+	REQUEST_CODE["AccountUpdates"] = 6
+	REQUEST_VERSION["AccountUpdates"] = 2
 }
 
 func (r *AccountUpdatesRequest) Send(id int64, b *AccountBroker) {
 	b.WriteInt(REQUEST_CODE["AccountUpdates"])
-	b.WriteInt(REQUEST_CODE["AccountUpdates"])
+	b.WriteInt(REQUEST_VERSION["AccountUpdates"])
 	b.WriteInt(id)
 	b.WriteBool(r.Subscribe)
 	b.WriteString(r.AccountCode)
@@ -72,12 +78,20 @@ func init() {
 	RESPONSE_CODE["AccountSummary"] = "63"
 }
 
-type AccountTime struct {
+type AccountSummaryEnd struct {
+	Rid int64
+}
+
+func init() {
+	RESPONSE_CODE["AccountSummaryEnd"] = "64"
+}
+
+type AccountUpdateTime struct {
 	Time string
 }
 
 func init() {
-	RESPONSE_CODE["AccountTime"] = "8"
+	RESPONSE_CODE["AccountUpdateTime"] = "8"
 }
 
 type Portfolio struct {
@@ -96,16 +110,26 @@ func init() {
 	RESPONSE_CODE["Portfolio"] = "7"
 }
 
+type AccountDownloadEnd struct {
+	AccountName string
+}
+
+func init() {
+	RESPONSE_CODE["AccountDownloadEnd"] = "54"
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // BROKER
 ////////////////////////////////////////////////////////////////////////////////
 
 type AccountBroker struct {
 	Broker
-	AccountValueChan   chan AccountValue
-	PortfolioChan      chan Portfolio
-	AccountTimeChan    chan AccountTime
-	AccountSummaryChan chan AccountSummary
+	AccountValueChan       chan AccountValue
+	PortfolioChan          chan Portfolio
+	AccountUpdateTimeChan  chan AccountUpdateTime
+	AccountDownloadEndChan chan AccountDownloadEnd
+	AccountSummaryChan     chan AccountSummary
+	AccountSummaryEndChan  chan AccountSummaryEnd
 }
 
 func NewAccountBroker() AccountBroker {
@@ -113,8 +137,10 @@ func NewAccountBroker() AccountBroker {
 		Broker{},
 		make(chan AccountValue),
 		make(chan Portfolio),
-		make(chan AccountTime),
+		make(chan AccountUpdateTime),
+		make(chan AccountDownloadEnd),
 		make(chan AccountSummary),
+		make(chan AccountSummaryEnd),
 	}
 
 	return b
@@ -142,8 +168,12 @@ func (b *AccountBroker) Listen() {
 				b.ReadPortfolio(s, version)
 			case RESPONSE_CODE["AccountUpdateTime"]:
 				b.ReadAccountUpdateTime(s, version)
+			case RESPONSE_CODE["AccountDownloadEnd"]:
+				b.ReadAccountDownloadEnd(s, version)
 			case RESPONSE_CODE["AccountSummary"]:
 				b.ReadAccountSummary(s, version)
+			case RESPONSE_CODE["AccountSummaryEnd"]:
+				b.ReadAccountSummaryEnd(s, version)
 			}
 		}
 	}
@@ -185,11 +215,19 @@ func (b *AccountBroker) ReadPortfolio(code, version string) {
 }
 
 func (b *AccountBroker) ReadAccountUpdateTime(code, version string) {
-	var r AccountTime
+	var r AccountUpdateTime
 
 	r.Time, _ = b.ReadString()
 
-	b.AccountTimeChan <- r
+	b.AccountUpdateTimeChan <- r
+}
+
+func (b *AccountBroker) ReadAccountDownloadEnd(code, version string) {
+	var r AccountDownloadEnd
+
+	r.AccountName, _ = b.ReadString()
+
+	b.AccountDownloadEndChan <- r
 }
 
 func (b *AccountBroker) ReadAccountSummary(code, version string) {
@@ -204,6 +242,74 @@ func (b *AccountBroker) ReadAccountSummary(code, version string) {
 	b.AccountSummaryChan <- r
 }
 
+func (b *AccountBroker) ReadAccountSummaryEnd(code, version string) {
+	var r AccountSummaryEnd
+
+	r.Rid, _ = b.ReadInt()
+
+	b.AccountSummaryEndChan <- r
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // SERIALIZERS
 ////////////////////////////////////////////////////////////////////////////////
+
+func (b *AccountBroker) AccountValueToJSON(d *AccountValue) ([]byte, error) {
+	return json.Marshal(struct {
+		Time     string
+		Key      string
+		Value    string
+		Currency string
+		Account  string
+	}{
+		Time:     strconv.FormatInt(time.Now().UTC().Add(-5*time.Hour).UnixNano(), 10),
+		Key:      d.Key,
+		Value:    d.Value,
+		Currency: d.Currency,
+		Account:  d.Account,
+	})
+}
+
+func (b *AccountBroker) AccountSummaryToJSON(d *AccountSummary) ([]byte, error) {
+	return json.Marshal(struct {
+		Rid      int64
+		Time     string
+		Account  string
+		Tag      string
+		Value    string
+		Currency string
+	}{
+		Rid:      d.Rid,
+		Time:     strconv.FormatInt(time.Now().UTC().Add(-5*time.Hour).UnixNano(), 10),
+		Account:  d.Account,
+		Tag:      d.Tag,
+		Value:    d.Value,
+		Currency: d.Currency,
+	})
+}
+
+func (b *AccountBroker) PortfolioToJSON(d *Portfolio) ([]byte, error) {
+	return json.Marshal(struct {
+		Time          string
+		Key           string
+		Contract      Contract
+		Position      int64
+		MarketPrice   float64
+		MarketValue   float64
+		AverageCost   float64
+		UnrealizedPNL float64
+		RealizedPNL   float64
+		AccountName   string
+	}{
+		Time:          strconv.FormatInt(time.Now().UTC().Add(-5*time.Hour).UnixNano(), 10),
+		Key:           d.Key,
+		Contract:      d.Contract,
+		Position:      d.Position,
+		MarketPrice:   d.MarketPrice,
+		MarketValue:   d.MarketValue,
+		AverageCost:   d.AverageCost,
+		UnrealizedPNL: d.UnrealizedPNL,
+		RealizedPNL:   d.RealizedPNL,
+		AccountName:   d.AccountName,
+	})
+}

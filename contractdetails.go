@@ -18,7 +18,7 @@ type ContractDetailsRequest struct {
 
 func init() {
 	REQUEST_CODE["ContractDetails"] = 9
-	REQUEST_VERSION["ContractDeetails"] = 7
+	REQUEST_VERSION["ContractDetails"] = 7
 }
 
 func (r *ContractDetailsRequest) Send(id int64, b *ContractDetailsBroker) {
