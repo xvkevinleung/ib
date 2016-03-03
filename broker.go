@@ -109,8 +109,9 @@ func (b *Broker) WriteBool(boo bool) (int, error) {
 
 func (b *Broker) ReadString() (string, error) {
 	str, err := b.InStream.ReadString(DELIM_BYTE)
+
 	if err != nil {
-		return "", err
+		return str, err
 	}
 
 	return strings.TrimRight(str, DELIM_STR), err

@@ -2,6 +2,7 @@ package ib
 
 import (
 	"encoding/json"
+	"log"
 	"strconv"
 	"time"
 )
@@ -21,9 +22,10 @@ func init() {
 }
 
 func (r *AccountUpdatesRequest) Send(id int64, b *AccountBroker) {
+	_ = id
+
 	b.WriteInt(REQUEST_CODE["AccountUpdates"])
 	b.WriteInt(REQUEST_VERSION["AccountUpdates"])
-	b.WriteInt(id)
 	b.WriteBool(r.Subscribe)
 	b.WriteString(r.AccountCode)
 
@@ -151,6 +153,10 @@ func (b *AccountBroker) Listen() {
 		s, err := b.ReadString()
 
 		if err != nil {
+			if err.Error() == "EOF" {
+				log.Println(s, err)
+				break
+			}
 			continue
 		}
 
@@ -174,6 +180,8 @@ func (b *AccountBroker) Listen() {
 				b.ReadAccountSummary(s, version)
 			case RESPONSE_CODE["AccountSummaryEnd"]:
 				b.ReadAccountSummaryEnd(s, version)
+			default:
+				b.ReadString()
 			}
 		}
 	}
