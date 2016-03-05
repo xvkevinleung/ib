@@ -180,8 +180,8 @@ func (b *AccountBroker) Listen() {
 				b.ReadAccountSummary(s, version)
 			case RESPONSE_CODE["AccountSummaryEnd"]:
 				b.ReadAccountSummaryEnd(s, version)
-			default:
-				b.ReadString()
+				//			default:
+				//				b.ReadString()
 			}
 		}
 	}
