@@ -169,25 +169,29 @@ func (b *AccountBroker) Listen() {
 
 			switch s {
 			case RESPONSE_CODE["AccountValue"]:
-				b.ReadAccountValue(s, version)
+				r := b.ReadAccountValue(s, version)
+				b.AccountValueChan <- r
 			case RESPONSE_CODE["Portfolio"]:
-				b.ReadPortfolio(s, version)
+				r := b.ReadPortfolio(s, version)
+				b.PortfolioChan <- r
 			case RESPONSE_CODE["AccountUpdateTime"]:
-				b.ReadAccountUpdateTime(s, version)
+				r := b.ReadAccountUpdateTime(s, version)
+				b.AccountUpdateTimeChan <- r
 			case RESPONSE_CODE["AccountDownloadEnd"]:
-				b.ReadAccountDownloadEnd(s, version)
+				r := b.ReadAccountDownloadEnd(s, version)
+				b.AccountDownloadEndChan <- r
 			case RESPONSE_CODE["AccountSummary"]:
-				b.ReadAccountSummary(s, version)
+				r := b.ReadAccountSummary(s, version)
+				b.AccountSummaryChan <- r
 			case RESPONSE_CODE["AccountSummaryEnd"]:
-				b.ReadAccountSummaryEnd(s, version)
-				//			default:
-				//				b.ReadString()
+				r := b.ReadAccountSummaryEnd(s, version)
+				b.AccountSummaryEndChan <- r
 			}
 		}
 	}
 }
 
-func (b *AccountBroker) ReadAccountValue(code, version string) {
+func (b *AccountBroker) ReadAccountValue(code, version string) AccountValue {
 	var r AccountValue
 
 	r.Key, _ = b.ReadString()
@@ -195,10 +199,10 @@ func (b *AccountBroker) ReadAccountValue(code, version string) {
 	r.Currency, _ = b.ReadString()
 	r.Account, _ = b.ReadString()
 
-	b.AccountValueChan <- r
+	return r
 }
 
-func (b *AccountBroker) ReadPortfolio(code, version string) {
+func (b *AccountBroker) ReadPortfolio(code, version string) Portfolio {
 	var r Portfolio
 
 	r.Contract.ContractId, _ = b.ReadInt()
@@ -219,26 +223,26 @@ func (b *AccountBroker) ReadPortfolio(code, version string) {
 	r.UnrealizedPNL, _ = b.ReadFloat()
 	r.AccountName, _ = b.ReadString()
 
-	b.PortfolioChan <- r
+	return r
 }
 
-func (b *AccountBroker) ReadAccountUpdateTime(code, version string) {
+func (b *AccountBroker) ReadAccountUpdateTime(code, version string) AccountUpdateTime {
 	var r AccountUpdateTime
 
 	r.Time, _ = b.ReadString()
 
-	b.AccountUpdateTimeChan <- r
+	return r
 }
 
-func (b *AccountBroker) ReadAccountDownloadEnd(code, version string) {
+func (b *AccountBroker) ReadAccountDownloadEnd(code, version string) AccountDownloadEnd {
 	var r AccountDownloadEnd
 
 	r.AccountName, _ = b.ReadString()
 
-	b.AccountDownloadEndChan <- r
+	return r
 }
 
-func (b *AccountBroker) ReadAccountSummary(code, version string) {
+func (b *AccountBroker) ReadAccountSummary(code, version string) AccountSummary {
 	var r AccountSummary
 
 	r.Rid, _ = b.ReadInt()
@@ -247,15 +251,15 @@ func (b *AccountBroker) ReadAccountSummary(code, version string) {
 	r.Value, _ = b.ReadString()
 	r.Currency, _ = b.ReadString()
 
-	b.AccountSummaryChan <- r
+	return r
 }
 
-func (b *AccountBroker) ReadAccountSummaryEnd(code, version string) {
+func (b *AccountBroker) ReadAccountSummaryEnd(code, version string) AccountSummaryEnd {
 	var r AccountSummaryEnd
 
 	r.Rid, _ = b.ReadInt()
 
-	b.AccountSummaryEndChan <- r
+	return r
 }
 
 ////////////////////////////////////////////////////////////////////////////////

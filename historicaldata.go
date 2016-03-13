@@ -14,7 +14,7 @@ type HistoricalDataRequest struct {
 	End      string
 	Bar      string
 	Dur      string
-	Rth      bool
+	Rth      bool `json:",string"`
 	Show     string
 	Datef    int64
 }
@@ -110,12 +110,13 @@ func (b *HistoricalDataBroker) Listen() {
 				continue
 			}
 
-			b.ReadHistoricalData(version)
+			r := b.ReadHistoricalData(version)
+			b.HistoricalDataChan <- r
 		}
 	}
 }
 
-func (b *HistoricalDataBroker) ReadHistoricalData(version string) {
+func (b *HistoricalDataBroker) ReadHistoricalData(version string) HistoricalData {
 	var r HistoricalData
 
 	r.Rid, _ = b.ReadString()
@@ -137,7 +138,7 @@ func (b *HistoricalDataBroker) ReadHistoricalData(version string) {
 		r.Data[i].BarCount, _ = b.ReadInt()
 	}
 
-	b.HistoricalDataChan <- r
+	return r
 }
 
 ////////////////////////////////////////////////////////////////////////////////

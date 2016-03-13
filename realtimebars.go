@@ -103,12 +103,13 @@ func (b *RealTimeBarsBroker) Listen() {
 				continue
 			}
 
-			b.ReadRealTimeBar(version)
+			r := b.ReadRealTimeBar(version)
+			b.RealTimeBarChan <- r
 		}
 	}
 }
 
-func (b *RealTimeBarsBroker) ReadRealTimeBar(version string) {
+func (b *RealTimeBarsBroker) ReadRealTimeBar(version string) RealTimeBar {
 	var r RealTimeBar
 
 	r.Rid, _ = b.ReadInt()
@@ -121,7 +122,7 @@ func (b *RealTimeBarsBroker) ReadRealTimeBar(version string) {
 	r.WAP, _ = b.ReadFloat()
 	r.BarCount, _ = b.ReadInt()
 
-	b.RealTimeBarChan <- r
+	return r
 }
 
 ////////////////////////////////////////////////////////////////////////////////

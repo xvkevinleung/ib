@@ -183,20 +183,27 @@ func (b *MarketDataBroker) Listen() {
 
 			switch s {
 			case RESPONSE_CODE["TickPrice"]:
-				b.ReadTickPrice(s, version)
+				r := b.ReadTickPrice(s, version)
+				b.TickPriceChan <- r
 			case RESPONSE_CODE["TickSize"]:
-				b.ReadTickSize(s, version)
+				r := b.ReadTickSize(s, version)
+				b.TickSizeChan <- r
 			case RESPONSE_CODE["TickOptComp"]:
-				b.ReadTickOptComp(s, version)
+				r := b.ReadTickOptComp(s, version)
+				b.TickOptCompChan <- r
 			case RESPONSE_CODE["TickGeneric"]:
-				b.ReadTickGeneric(s, version)
+				r := b.ReadTickGeneric(s, version)
+				b.TickGenericChan <- r
 			case RESPONSE_CODE["TickString"]:
-				b.ReadTickString(s, version)
+				r := b.ReadTickString(s, version)
+				b.TickStringChan <- r
 			case RESPONSE_CODE["TickEFP"]:
-				b.ReadTickEFP(s, version)
+				r := b.ReadTickEFP(s, version)
+				b.TickEFPChan <- r
 				//			case RESPONSE.CODE.TICK_SNAPSHOT_END:
 			case RESPONSE_CODE["MarketDataType"]:
-				b.ReadMarketDataType(s, version)
+				r := b.ReadMarketDataType(s, version)
+				b.MarketDataTypeChan <- r
 			default:
 				b.ReadString()
 			}
@@ -204,7 +211,7 @@ func (b *MarketDataBroker) Listen() {
 	}
 }
 
-func (b *MarketDataBroker) ReadTickPrice(code, version string) {
+func (b *MarketDataBroker) ReadTickPrice(code, version string) TickPrice {
 	var r TickPrice
 
 	r.Rid, _ = b.ReadInt()
@@ -213,20 +220,20 @@ func (b *MarketDataBroker) ReadTickPrice(code, version string) {
 	r.Size, _ = b.ReadInt()
 	r.CanAutoExecute, _ = b.ReadBool()
 
-	b.TickPriceChan <- r
+	return r
 }
 
-func (b *MarketDataBroker) ReadTickSize(code, version string) {
+func (b *MarketDataBroker) ReadTickSize(code, version string) TickSize {
 	var r TickSize
 
 	r.Rid, _ = b.ReadInt()
 	r.TickType, _ = b.ReadInt()
 	r.Size, _ = b.ReadInt()
 
-	b.TickSizeChan <- r
+	return r
 }
 
-func (b *MarketDataBroker) ReadTickOptComp(code, version string) {
+func (b *MarketDataBroker) ReadTickOptComp(code, version string) TickOptComp {
 	var r TickOptComp
 
 	r.Rid, _ = b.ReadInt()
@@ -240,30 +247,30 @@ func (b *MarketDataBroker) ReadTickOptComp(code, version string) {
 	r.Theta, _ = b.ReadFloat()
 	r.UndPrice, _ = b.ReadFloat()
 
-	b.TickOptCompChan <- r
+	return r
 }
 
-func (b *MarketDataBroker) ReadTickGeneric(code, version string) {
+func (b *MarketDataBroker) ReadTickGeneric(code, version string) TickGeneric {
 	var r TickGeneric
 
 	r.Rid, _ = b.ReadInt()
 	r.TickType, _ = b.ReadInt()
 	r.Value, _ = b.ReadFloat()
 
-	b.TickGenericChan <- r
+	return r
 }
 
-func (b *MarketDataBroker) ReadTickString(code, version string) {
+func (b *MarketDataBroker) ReadTickString(code, version string) TickString {
 	var r TickString
 
 	r.Rid, _ = b.ReadInt()
 	r.TickType, _ = b.ReadInt()
 	r.Value, _ = b.ReadString()
 
-	b.TickStringChan <- r
+	return r
 }
 
-func (b *MarketDataBroker) ReadTickEFP(code, version string) {
+func (b *MarketDataBroker) ReadTickEFP(code, version string) TickEFP {
 	var r TickEFP
 
 	r.Rid, _ = b.ReadInt()
@@ -276,16 +283,16 @@ func (b *MarketDataBroker) ReadTickEFP(code, version string) {
 	r.DividendImpact, _ = b.ReadFloat()
 	r.DividendsToExpiry, _ = b.ReadFloat()
 
-	b.TickEFPChan <- r
+	return r
 }
 
-func (b *MarketDataBroker) ReadMarketDataType(code, version string) {
+func (b *MarketDataBroker) ReadMarketDataType(code, version string) MarketDataType {
 	var r MarketDataType
 
 	r.Rid, _ = b.ReadInt()
 	r.TickType, _ = b.ReadInt()
 
-	b.MarketDataTypeChan <- r
+	return r
 }
 
 ////////////////////////////////////////////////////////////////////////////////

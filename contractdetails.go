@@ -82,11 +82,6 @@ type ContractDetails struct {
 	SecIdList            []TagValue
 }
 
-type TagValue struct {
-	Tag   string
-	Value string
-}
-
 func init() {
 	RESPONSE_CODE["ContractDetails"] = "10"
 }
@@ -126,12 +121,13 @@ func (b *ContractDetailsBroker) Listen() {
 				continue
 			}
 
-			b.ReadContractDetails(version)
+			c := b.ReadContractDetails(version)
+			b.ContractDetailsChan <- c
 		}
 	}
 }
 
-func (b *ContractDetailsBroker) ReadContractDetails(version string) {
+func (b *ContractDetailsBroker) ReadContractDetails(version string) ContractDetails {
 	var c ContractDetails
 
 	c.Rid, _ = b.ReadInt()
@@ -174,7 +170,7 @@ func (b *ContractDetailsBroker) ReadContractDetails(version string) {
 		c.SecIdList = append(c.SecIdList, tv)
 	}
 
-	b.ContractDetailsChan <- c
+	return c
 }
 
 ////////////////////////////////////////////////////////////////////////////////

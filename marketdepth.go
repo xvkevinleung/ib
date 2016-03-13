@@ -112,9 +112,11 @@ func (b *MarketDepthBroker) Listen() {
 
 			switch s {
 			case RESPONSE_CODE["MarketDepth"]:
-				b.ReadMarketDepth(s, version)
+				r := b.ReadMarketDepth(s, version)
+				b.MarketDepthChan <- r
 			case RESPONSE_CODE["MarketDepthLevelTwo"]:
-				b.ReadMarketDepthLevelTwo(s, version)
+				r := b.ReadMarketDepthLevelTwo(s, version)
+				b.MarketDepthLevelTwoChan <- r
 			default:
 				b.ReadString()
 			}
@@ -122,7 +124,7 @@ func (b *MarketDepthBroker) Listen() {
 	}
 }
 
-func (b *MarketDepthBroker) ReadMarketDepth(code, version string) {
+func (b *MarketDepthBroker) ReadMarketDepth(code, version string) MarketDepth {
 	var r MarketDepth
 
 	r.Rid, _ = b.ReadInt()
@@ -132,10 +134,10 @@ func (b *MarketDepthBroker) ReadMarketDepth(code, version string) {
 	r.Price, _ = b.ReadFloat()
 	r.Size, _ = b.ReadInt()
 
-	b.MarketDepthChan <- r
+	return r
 }
 
-func (b *MarketDepthBroker) ReadMarketDepthLevelTwo(code, version string) {
+func (b *MarketDepthBroker) ReadMarketDepthLevelTwo(code, version string) MarketDepthLevelTwo {
 	var r MarketDepthLevelTwo
 
 	r.Rid, _ = b.ReadInt()
@@ -146,7 +148,7 @@ func (b *MarketDepthBroker) ReadMarketDepthLevelTwo(code, version string) {
 	r.Price, _ = b.ReadFloat()
 	r.Size, _ = b.ReadInt()
 
-	b.MarketDepthLevelTwoChan <- r
+	return r
 }
 
 ////////////////////////////////////////////////////////////////////////////////
