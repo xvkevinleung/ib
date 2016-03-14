@@ -15,7 +15,7 @@ type RealTimeBarsRequest struct {
 	Contract Contract
 	Bar      int64
 	Show     string // what to show
-	Rth      bool   // regular trading hours
+	Rth      bool   `json:",string"` // regular trading hours
 	Opts     string // use default "XYZ"
 }
 

@@ -12,10 +12,10 @@ type Order struct {
 	LimitPrice                    float64
 	AuxPrice                      float64
 	TIF                           string
-	ActiveStartTime               string
-	ActiveStopTime                string
 	OCAGroup                      string
-	OCAType                       int64
+	Account                       string
+	OpenClose                     string
+	Origin                        int64
 	OrderRef                      string
 	Transmit                      bool
 	ParentID                      int64
@@ -25,79 +25,54 @@ type Order struct {
 	TriggerMethod                 int64
 	OutsideRTH                    bool
 	Hidden                        bool
+	DiscretionaryAmount           float64
 	GoodAfterTime                 string
 	GoodTillDate                  string
-	OverridePercentageConstraints bool
-	Rule80A                       string
-	AllOrNone                     bool
-	MinQty                        int64
-	PercentOffset                 float64
-	TrailStopPrice                float64
-	TrailingPercent               float64
 	FAGroup                       string
-	FAProfile                     string
 	FAMethod                      string
 	FAPercentage                  string
-	OpenClose                     string
-	Origin                        int64
+	FAProfile                     string
 	ShortSaleSlot                 int64
 	DesignatedLocation            string
 	ExemptCode                    int64
-	DiscretionaryAmount           float64
-	ETradeOnly                    int64
+	OCAType                       int64
+	Rule80A                       string
+	SettlingFirm                  string
+	AllOrNone                     bool
+	MinQty                        int64
+	PercentOffset                 float64
+	ETradeOnly                    bool
 	FirmQuoteOnly                 bool
 	NBBOPriceCap                  float64
-	OptOutSmartRouting            bool
 	AuctionStrategy               int64
 	StartingPrice                 float64
 	StockRefPrice                 float64
 	Delta                         float64
 	StockRangeLower               float64
 	StockRangeUpper               float64
+	OverridePercentageConstraints bool
 	Volatility                    float64
 	VolatilityType                int64
-	ContinuousUpdate              int64
-	ReferencePriceType            int64
 	DeltaNeutralOrderType         string
 	DeltaNeutralAuxPrice          float64
-	BasisPoints                   float64
-	BasisPointsType               int64
-	ScaleInitLevelSize            int64   // max
-	ScaleSubsLevelSize            int64   // max
-	ScalePriceIncrement           float64 // max
-	ScalePriceAdjustValue         float64
-	ScalePriceAdjustInterval      int64
-	ScaleProfitOffset             float64
-	ScaleAutoReset                bool
-	ScaleInitPosition             int64
-	ScaleInitFillQty              int64
-	ScaleRandomPercent            bool
+	ContinuousUpdate              int64
+	ReferencePriceType            int64
+	TrailStopPrice                float64
+	TrailingPercent               float64
+	ScaleInitLevelSize            int64
+	ScaleSubsLevelSize            int64
+	ScalePriceIncrement           float64
 	ScaleTable                    string
+	ActiveStartTime               string
+	ActiveStopTime                string
 	HedgeType                     string
-	HedgeParam                    string
-	Account                       string
-	SettlingFirm                  string
+	OptOutSmartRouting            bool
 	ClearingAccount               string
 	ClearingIntent                string
-	AlgoStrategy                  string
-	AlgoParams                    string // []TagValue
-	WhatIf                        bool
 	NotHeld                       bool
-	SmartComboRoutingParams       string // []TagValue
-	OrderComboLegs                string // []TagValue
+	AlgoStrategy                  string
+	WhatIf                        bool
 	OrderMiscOptions              string // []TagValue
-}
-
-type OrderState struct {
-	Commission         float64
-	CommissionCurrency string
-	EquityWithLoan     string
-	InitMargin         string
-	MaintMargin        string
-	MaxCommission      float64
-	MinCommission      float64
-	Status             string
-	WarningText        string
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -118,6 +93,10 @@ func (r *PlaceOrderRequest) Send(id int64, b *OrderBroker) {
 	b.WriteInt(REQUEST_CODE["PlaceOrder"])
 	b.WriteInt(REQUEST_VERSION["PlaceOrder"])
 	b.WriteInt(id)
+
+	////////////////////
+	// contract fields
+
 	b.WriteInt(r.Contract.ContractId)
 	b.WriteString(r.Contract.Symbol)
 	b.WriteString(r.Contract.SecurityType)
@@ -126,6 +105,7 @@ func (r *PlaceOrderRequest) Send(id int64, b *OrderBroker) {
 	b.WriteString(r.Contract.Right)
 	b.WriteString(r.Contract.Multiplier)
 	b.WriteString(r.Contract.Exchange)
+	b.WriteString(r.Contract.PrimaryExchange)
 	b.WriteString(r.Contract.Currency)
 	b.WriteString(r.Contract.LocalSymbol)
 	b.WriteString(r.Contract.TradingClass)
@@ -133,16 +113,19 @@ func (r *PlaceOrderRequest) Send(id int64, b *OrderBroker) {
 	b.WriteString(r.Contract.SecIdType)
 	b.WriteString(r.Contract.SecId)
 
+	////////////////////
+	// order fields
+
 	b.WriteString(r.Order.Action)
 	b.WriteInt(r.Order.TotalQty)
 	b.WriteString(r.Order.OrderType)
 	b.WriteFloat(r.Order.LimitPrice)
 	b.WriteFloat(r.Order.AuxPrice)
 	b.WriteString(r.Order.TIF)
-	b.WriteString(r.Order.ActiveStartTime)
-	b.WriteString(r.Order.ActiveStopTime)
 	b.WriteString(r.Order.OCAGroup)
-	b.WriteInt(r.Order.OCAType)
+	b.WriteString(r.Order.Account)
+	b.WriteString(r.Order.OpenClose)
+	b.WriteInt(r.Order.Origin)
 	b.WriteString(r.Order.OrderRef)
 	b.WriteBool(r.Order.Transmit)
 	b.WriteInt(r.Order.ParentID)
@@ -152,66 +135,82 @@ func (r *PlaceOrderRequest) Send(id int64, b *OrderBroker) {
 	b.WriteInt(r.Order.TriggerMethod)
 	b.WriteBool(r.Order.OutsideRTH)
 	b.WriteBool(r.Order.Hidden)
+
+	// ignore combo legs by default
+	// TODO implement combo legs
+
+	// ignore smart combo routing options by default
+	// TODO smart combo routing options
+
+	// send deprecated shares allocation field
+	b.WriteString("")
+
+	b.WriteFloat(r.Order.DiscretionaryAmount)
 	b.WriteString(r.Order.GoodAfterTime)
 	b.WriteString(r.Order.GoodTillDate)
-	b.WriteBool(r.Order.OverridePercentageConstraints)
-	b.WriteString(r.Order.Rule80A)
-	b.WriteBool(r.Order.AllOrNone)
-	b.WriteInt(r.Order.MinQty)
-	b.WriteFloat(r.Order.PercentOffset)
-	b.WriteFloat(r.Order.TrailStopPrice)
-	b.WriteFloat(r.Order.TrailingPercent)
 	b.WriteString(r.Order.FAGroup)
-	b.WriteString(r.Order.FAProfile)
 	b.WriteString(r.Order.FAMethod)
 	b.WriteString(r.Order.FAPercentage)
-	b.WriteString(r.Order.OpenClose)
-	b.WriteInt(r.Order.Origin)
+	b.WriteString(r.Order.FAProfile)
 	b.WriteInt(r.Order.ShortSaleSlot)
 	b.WriteString(r.Order.DesignatedLocation)
 	b.WriteInt(r.Order.ExemptCode)
-	b.WriteFloat(r.Order.DiscretionaryAmount)
-	b.WriteInt(r.Order.ETradeOnly)
+	b.WriteInt(r.Order.OCAType)
+	b.WriteString(r.Order.Rule80A)
+	b.WriteString(r.Order.SettlingFirm)
+	b.WriteBool(r.Order.AllOrNone)
+	b.WriteInt(r.Order.MinQty)
+	b.WriteFloat(r.Order.PercentOffset)
+	b.WriteBool(r.Order.ETradeOnly)
 	b.WriteBool(r.Order.FirmQuoteOnly)
 	b.WriteFloat(r.Order.NBBOPriceCap)
-	b.WriteBool(r.Order.OptOutSmartRouting)
 	b.WriteInt(r.Order.AuctionStrategy)
 	b.WriteFloat(r.Order.StartingPrice)
 	b.WriteFloat(r.Order.StockRefPrice)
 	b.WriteFloat(r.Order.Delta)
 	b.WriteFloat(r.Order.StockRangeLower)
 	b.WriteFloat(r.Order.StockRangeUpper)
+	b.WriteBool(r.Order.OverridePercentageConstraints)
 	b.WriteFloat(r.Order.Volatility)
 	b.WriteInt(r.Order.VolatilityType)
-	b.WriteInt(r.Order.ContinuousUpdate)
-	b.WriteInt(r.Order.ReferencePriceType)
 	b.WriteString(r.Order.DeltaNeutralOrderType)
 	b.WriteFloat(r.Order.DeltaNeutralAuxPrice)
-	b.WriteFloat(r.Order.BasisPoints)
-	b.WriteInt(r.Order.BasisPointsType)
+	b.WriteInt(r.Order.ContinuousUpdate)
+	b.WriteInt(r.Order.ReferencePriceType)
+	b.WriteFloat(r.Order.TrailStopPrice)
+	b.WriteFloat(r.Order.TrailingPercent)
 	b.WriteInt(r.Order.ScaleInitLevelSize)
 	b.WriteInt(r.Order.ScaleSubsLevelSize)
 	b.WriteFloat(r.Order.ScalePriceIncrement)
-	b.WriteFloat(r.Order.ScalePriceAdjustValue)
-	b.WriteInt(r.Order.ScalePriceAdjustInterval)
-	b.WriteFloat(r.Order.ScaleProfitOffset)
-	b.WriteBool(r.Order.ScaleAutoReset)
-	b.WriteInt(r.Order.ScaleInitPosition)
-	b.WriteInt(r.Order.ScaleInitFillQty)
-	b.WriteBool(r.Order.ScaleRandomPercent)
+
+	// ignore scale price fields by default
+	// TODO implement scale price fields
+
 	b.WriteString(r.Order.ScaleTable)
+	b.WriteString(r.Order.ActiveStartTime)
+	b.WriteString(r.Order.ActiveStopTime)
 	b.WriteString(r.Order.HedgeType)
-	b.WriteString(r.Order.HedgeParam)
-	b.WriteString(r.Order.Account)
-	b.WriteString(r.Order.SettlingFirm)
+
+	// ignore hedge param by default
+	// TODO implement hedge param
+
+	b.WriteBool(r.Order.OptOutSmartRouting)
 	b.WriteString(r.Order.ClearingAccount)
 	b.WriteString(r.Order.ClearingIntent)
-	b.WriteString(r.Order.AlgoStrategy)
-	b.WriteString(r.Order.AlgoParams)
-	b.WriteBool(r.Order.WhatIf)
 	b.WriteBool(r.Order.NotHeld)
-	b.WriteString(r.Order.SmartComboRoutingParams)
-	b.WriteString(r.Order.OrderComboLegs)
+
+	// ignore contract undercomp by default
+	// TODO implement contract undercomp
+	b.WriteBool(false)
+	b.WriteString(r.Order.AlgoStrategy)
+
+	// ignore algo params by default
+	// TODO implement algo params
+
+	b.WriteBool(r.Order.WhatIf)
+
+	// ignore misc options by default
+	// TODO implement misc options
 	b.WriteString(r.Order.OrderMiscOptions)
 
 	b.Broker.SendRequest()
@@ -228,6 +227,7 @@ func init() {
 
 func (r *CancelOrderRequest) Send(id int64, b *OrderBroker) {
 	_ = id
+
 	b.WriteInt(REQUEST_CODE["CancelOrder"])
 	b.WriteInt(REQUEST_VERSION["CancelOrder"])
 	b.WriteInt(r.Rid)
@@ -246,6 +246,7 @@ func init() {
 
 func (r *NextValidIdRequest) Send(id int64, b *OrderBroker) {
 	_ = id
+
 	b.WriteInt(REQUEST_CODE["NextRid"])
 	b.WriteInt(REQUEST_VERSION["NextRid"])
 	b.WriteInt(r.Num)
@@ -272,6 +273,18 @@ type OrderStatus struct {
 
 func init() {
 	RESPONSE_CODE["OrderStatus"] = "3"
+}
+
+type OrderState struct {
+	Commission         float64
+	CommissionCurrency string
+	EquityWithLoan     string
+	InitMargin         string
+	MaintMargin        string
+	MaxCommission      float64
+	MinCommission      float64
+	Status             string
+	WarningText        string
 }
 
 type OpenOrder struct {
@@ -315,6 +328,35 @@ func NewOrderBroker() OrderBroker {
 	return b
 }
 
+func (b *OrderBroker) NewOrder() Order {
+	return Order{
+		LimitPrice:           MAX_FLOAT,
+		AuxPrice:             MAX_FLOAT,
+		Transmit:             true,
+		MinQty:               MAX_INT,
+		PercentOffset:        MAX_FLOAT,
+		TrailStopPrice:       MAX_FLOAT,
+		TrailingPercent:      MAX_FLOAT,
+		OpenClose:            "0",
+		ExemptCode:           -1,
+		ETradeOnly:           true,
+		FirmQuoteOnly:        true,
+		NBBOPriceCap:         MAX_FLOAT,
+		StartingPrice:        MAX_FLOAT,
+		StockRefPrice:        MAX_FLOAT,
+		Delta:                MAX_FLOAT,
+		StockRangeLower:      MAX_FLOAT,
+		StockRangeUpper:      MAX_FLOAT,
+		Volatility:           MAX_FLOAT,
+		VolatilityType:       MAX_INT,
+		DeltaNeutralAuxPrice: MAX_FLOAT,
+		ReferencePriceType:   MAX_INT,
+		ScaleInitLevelSize:   MAX_INT,
+		ScaleSubsLevelSize:   MAX_INT,
+		ScalePriceIncrement:  MAX_FLOAT,
+	}
+}
+
 func (b *OrderBroker) Listen() {
 	for {
 		s, err := b.ReadString()
@@ -336,17 +378,20 @@ func (b *OrderBroker) Listen() {
 
 			switch s {
 			case RESPONSE_CODE["OrderStatus"]:
-				b.ReadOrderStatus(s, version)
+				r := b.ReadOrderStatus(s, version)
+				b.OrderStatusChan <- r
 				//      case RESPONSE_CODE["OpenOrder"]:
-				//        b.ReadOpenOrder(s, version)
+				//        r := b.ReadOpenOrder(s, version)
+				//        b.OpenOrderChan <- r
 			case RESPONSE_CODE["NextValidId"]:
-				b.ReadNextValidId(s, version)
+				r := b.ReadNextValidId(s, version)
+				b.NextValidIdChan <- r
 			}
 		}
 	}
 }
 
-func (b *OrderBroker) ReadOrderStatus(code, version string) {
+func (b *OrderBroker) ReadOrderStatus(code, version string) OrderStatus {
 	var r OrderStatus
 
 	r.Rid, _ = b.ReadInt()
@@ -360,19 +405,19 @@ func (b *OrderBroker) ReadOrderStatus(code, version string) {
 	r.ClientId, _ = b.ReadInt()
 	r.WhyHeld, _ = b.ReadString()
 
-	b.OrderStatusChan <- r
+	return r
 }
 
-// func (b *OrderBroker) ReadOpenOrder(code, version string) {
+// func (b *OrderBroker) ReadOpenOrder(code, version string) OpenOrder {
 //   var r OpenOrder
 //
-//   b.OpenOrderChan <- r
+//   return r
 // }
 
-func (b *OrderBroker) ReadNextValidId(code, version string) {
+func (b *OrderBroker) ReadNextValidId(code, version string) NextValidId {
 	var r NextValidId
 
 	r.OrderId, _ = b.ReadInt()
 
-	b.NextValidIdChan <- r
+	return r
 }
