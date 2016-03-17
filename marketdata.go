@@ -52,6 +52,13 @@ func (r *MarketDataRequest) Send(id int64, b *MarketDataBroker) {
 
 type TickPrice struct {
 	Rid            int64
+	Symbol         string
+	SecurityType   string
+	Exchange       string
+	Currency       string
+	Right          string
+	Strike         float64
+	Expiry         string
 	TickType       int64
 	Price          float64
 	Size           int64
@@ -215,6 +222,16 @@ func (b *MarketDataBroker) ReadTickPrice(code, version string) TickPrice {
 	var r TickPrice
 
 	r.Rid, _ = b.ReadInt()
+
+	c := b.Contracts[r.Rid]
+
+	r.Symbol = c.Symbol
+	r.SecurityType = c.SecurityType
+	r.Exchange = c.Exchange
+	r.Currency = c.Currency
+	r.Right = c.Right
+	r.Strike = c.Strike
+	r.Expiry = c.Expiry
 	r.TickType, _ = b.ReadInt()
 	r.Price, _ = b.ReadFloat()
 	r.Size, _ = b.ReadInt()

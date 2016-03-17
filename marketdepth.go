@@ -47,12 +47,19 @@ func (r *MarketDepthRequest) Send(id int64, b *MarketDepthBroker) {
 ////////////////////////////////////////////////////////////////////////////////
 
 type MarketDepth struct {
-	Rid       int64
-	Position  int64
-	Operation int64
-	Side      int64
-	Price     float64
-	Size      int64
+	Rid          int64
+	Symbol       string
+	SecurityType string
+	Exchange     string
+	Currency     string
+	Right        string
+	Strike       float64
+	Expiry       string
+	Position     int64
+	Operation    int64
+	Side         int64
+	Price        float64
+	Size         int64
 }
 
 func init() {
@@ -128,6 +135,16 @@ func (b *MarketDepthBroker) ReadMarketDepth(code, version string) MarketDepth {
 	var r MarketDepth
 
 	r.Rid, _ = b.ReadInt()
+
+	c := b.Contracts[r.Rid]
+
+	r.Symbol = c.Symbol
+	r.SecurityType = c.SecurityType
+	r.Exchange = c.Exchange
+	r.Currency = c.Currency
+	r.Right = c.Right
+	r.Strike = c.Strike
+	r.Expiry = c.Expiry
 	r.Position, _ = b.ReadInt()
 	r.Operation, _ = b.ReadInt()
 	r.Side, _ = b.ReadInt()

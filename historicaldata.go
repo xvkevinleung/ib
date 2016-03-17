@@ -65,15 +65,22 @@ type HistoricalData struct {
 }
 
 type HistoricalDataItem struct {
-	Date     string
-	Open     float64
-	High     float64
-	Low      float64
-	Close    float64
-	Volume   int64
-	WAP      float64
-	HasGaps  bool
-	BarCount int64
+	Date         string
+	Symbol       string
+	Exchange     string
+	SecurityType string
+	Currency     string
+	Right        string
+	Strike       float64
+	Expiry       string
+	Open         float64
+	High         float64
+	Low          float64
+	Close        float64
+	Volume       int64
+	WAP          float64
+	HasGaps      bool
+	BarCount     int64
 }
 
 func init() {
@@ -128,6 +135,13 @@ func (b *HistoricalDataBroker) ReadHistoricalData(version string) HistoricalData
 
 	for i := range r.Data {
 		r.Data[i].Date, _ = b.ReadString()
+		r.Data[i].Symbol = b.Contract.Symbol
+		r.Data[i].Exchange = b.Contract.Exchange
+		r.Data[i].SecurityType = b.Contract.SecurityType
+		r.Data[i].Currency = b.Contract.Currency
+		r.Data[i].Right = b.Contract.Right
+		r.Data[i].Strike = b.Contract.Strike
+		r.Data[i].Expiry = b.Contract.Expiry
 		r.Data[i].Open, _ = b.ReadFloat()
 		r.Data[i].High, _ = b.ReadFloat()
 		r.Data[i].Low, _ = b.ReadFloat()

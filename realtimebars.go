@@ -53,15 +53,22 @@ func (r *RealTimeBarsRequest) Send(id int64, b *RealTimeBarsBroker) {
 ////////////////////////////////////////////////////////////////////////////////
 
 type RealTimeBar struct {
-	Rid      int64
-	Time     string
-	Open     float64
-	High     float64
-	Low      float64
-	Close    float64
-	Volume   int64
-	WAP      float64
-	BarCount int64
+	Rid          int64
+	Symbol       string
+	SecurityType string
+	Exchange     string
+	Currency     string
+	Right        string
+	Strike       float64
+	Expiry       string
+	Time         string
+	Open         float64
+	High         float64
+	Low          float64
+	Close        float64
+	Volume       int64
+	WAP          float64
+	BarCount     int64
 }
 
 func init() {
@@ -113,6 +120,16 @@ func (b *RealTimeBarsBroker) ReadRealTimeBar(version string) RealTimeBar {
 	var r RealTimeBar
 
 	r.Rid, _ = b.ReadInt()
+
+	c := b.Contracts[r.Rid]
+
+	r.Symbol = c.Symbol
+	r.SecurityType = c.SecurityType
+	r.Exchange = c.Exchange
+	r.Currency = c.Currency
+	r.Right = c.Right
+	r.Strike = c.Strike
+	r.Expiry = c.Expiry
 	r.Time, _ = b.ReadString()
 	r.Open, _ = b.ReadFloat()
 	r.High, _ = b.ReadFloat()
