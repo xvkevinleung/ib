@@ -12,6 +12,7 @@ import (
 ////////////////////////////////////////////////////////////////////////////////
 
 type MarketDepthRequest struct {
+	Rid      int64
 	Contract Contract
 	NumRows  int64
 }
@@ -21,11 +22,11 @@ func init() {
 	REQUEST_VERSION["MarketDepth"] = 4
 }
 
-func (r *MarketDepthRequest) Send(id int64, b *MarketDepthBroker) {
-	b.Contracts[id] = r.Contract
+func (r *MarketDepthRequest) Send(b *MarketDepthBroker) {
+	b.Contracts[r.Rid] = r.Contract
 	b.WriteInt(REQUEST_CODE["MarketDepth"])
 	b.WriteInt(REQUEST_VERSION["MarketDepth"])
-	b.WriteInt(id)
+	b.WriteInt(r.Rid)
 	b.WriteInt(r.Contract.ContractId)
 	b.WriteString(r.Contract.Symbol)
 	b.WriteString(r.Contract.SecurityType)
@@ -40,6 +41,25 @@ func (r *MarketDepthRequest) Send(id int64, b *MarketDepthBroker) {
 	b.WriteInt(r.NumRows)
 
 	b.Broker.SendRequest()
+}
+
+type CancelMarketDepthRequest struct {
+	Rid int64
+}
+
+func init() {
+	REQUEST_CODE["CancelMarketDepth"] = 11
+	REQUEST_VERSION["CancelMarketDepth"] = 1
+}
+
+func (r *CancelMarketDepthRequest) Send(b *MarketDepthBroker) {
+	b.WriteInt(REQUEST_CODE["CancelMarketDepth"])
+	b.WriteInt(REQUEST_VERSION["CancelMarketDepth"])
+	b.WriteInt(r.Rid)
+
+	b.Broker.SendRequest()
+
+	delete(b.Contracts, r.Rid)
 }
 
 ////////////////////////////////////////////////////////////////////////////////

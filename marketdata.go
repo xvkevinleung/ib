@@ -12,6 +12,7 @@ import (
 ////////////////////////////////////////////////////////////////////////////////
 
 type MarketDataRequest struct {
+	Rid             int64
 	Contract        Contract
 	GenericTickList string
 	Snapshot        bool
@@ -22,11 +23,11 @@ func init() {
 	REQUEST_VERSION["MarketData"] = 10
 }
 
-func (r *MarketDataRequest) Send(id int64, b *MarketDataBroker) {
-	b.Contracts[id] = r.Contract
+func (r *MarketDataRequest) Send(b *MarketDataBroker) {
+	b.Contracts[r.Rid] = r.Contract
 	b.WriteInt(REQUEST_CODE["MarketData"])
 	b.WriteInt(REQUEST_VERSION["MarketData"])
-	b.WriteInt(id)
+	b.WriteInt(r.Rid)
 	b.WriteInt(r.Contract.ContractId)
 	b.WriteString(r.Contract.Symbol)
 	b.WriteString(r.Contract.SecurityType)
@@ -44,6 +45,25 @@ func (r *MarketDataRequest) Send(id int64, b *MarketDataBroker) {
 	b.WriteBool(r.Snapshot)
 
 	b.Broker.SendRequest()
+}
+
+type CancelMarketDataRequest struct {
+	Rid int64
+}
+
+func init() {
+	REQUEST_CODE["CancelMarketData"] = 2
+	REQUEST_VERSION["CancelMarketData"] = 1
+}
+
+func (r *CancelMarketDataRequest) Send(b *MarketDataBroker) {
+	b.WriteInt(REQUEST_CODE["CancelMarketData"])
+	b.WriteInt(REQUEST_VERSION["CancelMarketData"])
+	b.WriteInt(r.Rid)
+
+	b.Broker.SendRequest()
+
+	delete(b.Contracts, r.Rid)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
