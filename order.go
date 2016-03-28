@@ -386,6 +386,8 @@ func (b *OrderBroker) Listen() {
 			case RESPONSE_CODE["NextValidId"]:
 				r := b.ReadNextValidId(s, version)
 				b.NextValidIdChan <- r
+      default:
+        b.ReadString()
 			}
 		}
 	}
